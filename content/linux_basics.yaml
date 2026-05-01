@@ -1,0 +1,146 @@
+skill: linux
+questions:
+  - id: lin-find-name
+    skill: linux
+    prompt: |
+      Which command finds all `.log` files under `/var` modified in last 7 days?
+    choices:
+      - "find /var -name '*.log' -mtime -7"
+      - "find /var -type f '*.log' -ctime 7"
+      - "grep -r '*.log' /var --since=7d"
+      - "ls -R /var | grep .log | head -7"
+    answer: 0
+    explain: "`-mtime -7` = modified < 7 days ago. `-name` matches glob."
+    tags: [find, file-search]
+
+  - id: lin-grep-count
+    skill: linux
+    prompt: "Count lines containing 'ERROR' in app.log."
+    choices:
+      - "grep -c ERROR app.log"
+      - "grep ERROR app.log | wc"
+      - "wc -l app.log | grep ERROR"
+      - "cat app.log | find ERROR"
+    answer: 0
+    explain: "`grep -c` prints match count per file."
+    tags: [grep]
+
+  - id: lin-perm-octal
+    skill: linux
+    prompt: "What does `chmod 750 script.sh` set?"
+    choices:
+      - "owner: rwx, group: r-x, other: ---"
+      - "owner: rwx, group: rwx, other: r--"
+      - "owner: r-x, group: r-x, other: ---"
+      - "owner: rw-, group: r--, other: r--"
+    answer: 0
+    explain: "7=rwx, 5=r-x, 0=---. Order: owner, group, other."
+    tags: [permissions]
+
+  - id: lin-pipe-awk
+    skill: linux
+    prompt: "Print 2nd column of every line in /etc/passwd (colon-delimited)."
+    choices:
+      - "awk -F: '{print $2}' /etc/passwd"
+      - "cut -d: -2 /etc/passwd"
+      - "awk '{print $2}' /etc/passwd"
+      - "sed 's/:/\\n/2' /etc/passwd"
+    answer: 0
+    explain: "`-F:` set field separator. `$2` = second field."
+    tags: [awk, text]
+
+  - id: lin-signal-term
+    skill: linux
+    prompt: "Default signal sent by `kill <pid>` (no flag)?"
+    choices:
+      - "SIGTERM (15)"
+      - "SIGKILL (9)"
+      - "SIGHUP (1)"
+      - "SIGINT (2)"
+    answer: 0
+    explain: "`kill` defaults to SIGTERM. SIGKILL needs `-9`."
+    tags: [signals, processes]
+
+  - id: lin-ps-tree
+    skill: linux
+    prompt: "Show full process tree with PIDs."
+    choices:
+      - "ps -ef --forest"
+      - "ps aux"
+      - "top -H"
+      - "lsof -p"
+    answer: 0
+    explain: "`--forest` draws ASCII tree. `pstree -p` is alternative."
+    tags: [processes]
+
+  - id: lin-tar-extract
+    skill: linux
+    prompt: "Extract `archive.tar.gz` to current dir, verbose."
+    choices:
+      - "tar -xzvf archive.tar.gz"
+      - "tar -czvf archive.tar.gz"
+      - "gzip -d archive.tar.gz"
+      - "unzip archive.tar.gz"
+    answer: 0
+    explain: "x=extract, z=gzip, v=verbose, f=file. `c` would create."
+    tags: [archive]
+
+  - id: lin-disk-usage
+    skill: linux
+    prompt: "Find top-10 largest dirs under current path."
+    choices:
+      - "du -h --max-depth=1 | sort -hr | head"
+      - "ls -lhS | head -10"
+      - "df -h ."
+      - "find . -size +1G"
+    answer: 0
+    explain: "`du --max-depth=1` summarises top level; `sort -hr` numeric reverse."
+    tags: [disk]
+
+  - id: lin-ss-listen
+    skill: linux
+    prompt: "List all listening TCP ports with process info."
+    choices:
+      - "ss -tlnp"
+      - "netstat -a"
+      - "lsof -i tcp"
+      - "ip route"
+    answer: 0
+    explain: "t=tcp, l=listening, n=numeric, p=process. ss replaces netstat."
+    tags: [network]
+
+  - id: lin-systemd-status
+    skill: linux
+    prompt: "Check status + recent logs of `nginx` service (systemd)."
+    choices:
+      - "systemctl status nginx"
+      - "service nginx logs"
+      - "journalctl nginx"
+      - "ps aux | grep nginx"
+    answer: 0
+    explain: "`systemctl status` shows state + tail of journal. Canonical/Ubuntu uses systemd."
+    tags: [systemd]
+
+  - id: lin-xargs-rm
+    skill: linux
+    prompt: "Delete all `.tmp` files found under /tmp safely with spaces in names."
+    choices:
+      - "find /tmp -name '*.tmp' -print0 | xargs -0 rm -f"
+      - "rm /tmp/*.tmp"
+      - "find /tmp -name '*.tmp' | rm"
+      - "ls /tmp/*.tmp | xargs rm"
+    answer: 0
+    explain: "`-print0`/`-0` use NUL separator — handles spaces/newlines in names."
+    tags: [find, xargs]
+
+  - id: lin-sed-inplace
+    skill: linux
+    prompt: "Replace all 'foo' with 'bar' in file.txt, in place."
+    choices:
+      - "sed -i 's/foo/bar/g' file.txt"
+      - "sed 's/foo/bar/' file.txt"
+      - "awk '{gsub(/foo/, bar)}' file.txt"
+      - "tr foo bar < file.txt"
+    answer: 0
+    explain: "`-i` edits in place. `g` flag = all matches per line."
+    tags: [sed, text]

@@ -1,0 +1,7 @@
+id: task-easy-syslog
+skill: python
+difficulty: easy
+title: "parse_syslog — group syslog lines by level"
+suggested_minutes: 30
+visible_tests: ["test_visible.py"]
+hidden_tests: ["test_hidden.py"]

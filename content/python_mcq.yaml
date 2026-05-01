@@ -1,0 +1,301 @@
+skill: python
+questions:
+  - id: py-list-vs-tuple
+    skill: python
+    prompt: "Which is true about tuples vs lists?"
+    choices:
+      - "Tuples are immutable; can be dict keys if elements are hashable."
+      - "Tuples are mutable; lists are not."
+      - "Tuples are faster only for very small sizes; lists always faster otherwise."
+      - "Tuples cannot contain mixed types."
+    answer: 0
+    explain: "Hashability of a tuple = AND of element hashability. List is unhashable, never a key."
+    tags: [datastructures]
+
+  - id: py-mutable-default
+    skill: python
+    prompt: "What does `def f(x, lst=[]): lst.append(x); return lst` print on `f(1); f(2)`?"
+    choices:
+      - "[1] then [1, 2]"
+      - "[1] then [2]"
+      - "[1, 2] then [1, 2]"
+      - "TypeError"
+    answer: 0
+    explain: "Default args evaluated once at def-time. Same list reused across calls — classic gotcha."
+    tags: [functions, gotcha]
+
+  - id: py-gen-vs-list
+    skill: python
+    prompt: "Difference between `[x*x for x in range(N)]` and `(x*x for x in range(N))`?"
+    choices:
+      - "List comp builds in memory; generator expr is lazy/iterates once."
+      - "Both are lazy; only syntax differs."
+      - "Generator expr is faster for membership tests with `in`."
+      - "Generator expr is mutable, list comp is not."
+    answer: 0
+    explain: "Generators yield on demand — O(1) memory, single pass. List materialises all."
+    tags: [generators]
+
+  - id: py-gil
+    skill: python
+    prompt: "Best concurrency model for CPU-bound numeric work in CPython 3.11?"
+    choices:
+      - "multiprocessing or C-extension that releases GIL"
+      - "threading"
+      - "asyncio"
+      - "signal-driven coroutines"
+    answer: 0
+    explain: "GIL serialises pure-Python bytecode. Processes sidestep it; numpy/etc. release GIL in C."
+    tags: [concurrency, gil]
+
+  - id: py-async-await
+    skill: python
+    prompt: "What does `await asyncio.gather(a(), b())` do?"
+    choices:
+      - "Run a() and b() concurrently, return results when both complete."
+      - "Run a() then b() sequentially."
+      - "Spawn OS threads for a() and b()."
+      - "Schedule a() and b() but return immediately without results."
+    answer: 0
+    explain: "gather schedules awaitables on the loop, awaits all, returns list of results in order."
+    tags: [asyncio]
+
+  - id: py-context-mgr
+    skill: python
+    prompt: "Easiest way to write a one-shot context manager around setup/teardown?"
+    choices:
+      - "@contextlib.contextmanager on a generator with yield"
+      - "Subclass contextlib.AbstractContextManager"
+      - "Define __enter__ and __exit__ in a class"
+      - "Use try/finally without a manager"
+    answer: 0
+    explain: "`@contextmanager` lets you write `setup; yield value; teardown` in a single function."
+    tags: [context-manager]
+
+  - id: py-dunder-eq-hash
+    skill: python
+    prompt: "If you define __eq__ on a class but not __hash__, what happens?"
+    choices:
+      - "Instances become unhashable (cannot be dict keys / set elements)."
+      - "Hash falls back to id()."
+      - "Python raises at class definition."
+      - "Hash is auto-derived from __eq__."
+    answer: 0
+    explain: "Defining __eq__ implicitly sets __hash__ = None. Must reinstate or define __hash__."
+    tags: [datamodel]
+
+  - id: py-dataclass-frozen
+    skill: python
+    prompt: "Effect of `@dataclass(frozen=True)`?"
+    choices:
+      - "Instances are immutable; gain __hash__ automatically."
+      - "Class becomes a singleton."
+      - "All fields become ClassVar."
+      - "Disables __init__ generation."
+    answer: 0
+    explain: "Frozen dataclass forbids attribute assignment after init and adds __hash__ based on fields."
+    tags: [dataclass]
+
+  - id: py-slots
+    skill: python
+    prompt: "What does declaring `__slots__ = ('a', 'b')` on a class do?"
+    choices:
+      - "Restricts attributes to those names, removes per-instance __dict__, saves memory."
+      - "Speeds up attribute lookup but does not affect memory."
+      - "Marks the class as final."
+      - "Required for multiple inheritance."
+    answer: 0
+    explain: "Slots: fixed-layout instance, no __dict__/__weakref__ unless added. Trades flexibility for memory/speed."
+    tags: [classes, performance]
+
+  - id: py-typing-protocol
+    skill: python
+    prompt: "Difference between typing.Protocol and abc.ABC?"
+    choices:
+      - "Protocol = structural (duck) typing; ABC = nominal (must inherit)."
+      - "They are interchangeable."
+      - "Protocol enforces at runtime; ABC does not."
+      - "Protocol cannot have methods."
+    answer: 0
+    explain: "Protocol: any class with matching shape passes isinstance (when @runtime_checkable). ABC requires explicit subclassing."
+    tags: [typing]
+
+  - id: py-pathlib-glob
+    skill: python
+    prompt: "Recursive glob for all `.py` under cwd via pathlib?"
+    choices:
+      - "Path('.').rglob('*.py')"
+      - "Path('.').glob('*.py')"
+      - "Path('.').iterdir(recursive=True)"
+      - "Path('.').walk('.py')"
+    answer: 0
+    explain: "`rglob` = recursive. `glob` only matches at given level."
+    tags: [stdlib, pathlib]
+
+  - id: py-itertools-groupby
+    skill: python
+    prompt: "Key gotcha with itertools.groupby?"
+    choices:
+      - "Only groups consecutive equal keys; sort first if you want all groups."
+      - "Returns a dict, not an iterator."
+      - "Groups by hash, ignoring order."
+      - "Cannot accept a key function."
+    answer: 0
+    explain: "groupby is streaming — like uniq, not SQL GROUP BY. Sort by the key first to consolidate."
+    tags: [stdlib, itertools]
+
+  - id: py-functools-cache
+    skill: python
+    prompt: "Best stdlib decorator for memoising a pure function with hashable args (3.9+)?"
+    choices:
+      - "@functools.cache"
+      - "@functools.lru_cache(maxsize=None) only"
+      - "@functools.singledispatch"
+      - "@functools.wraps"
+    answer: 0
+    explain: "`@cache` (3.9+) is unbounded memoisation; lru_cache is bounded. Both work for hashable args."
+    tags: [stdlib, functools]
+
+  - id: py-exception-chain
+    skill: python
+    prompt: "What does `raise X from Y` do that bare `raise X` does not?"
+    choices:
+      - "Sets X.__cause__ = Y; clearer chained traceback."
+      - "Suppresses Y entirely."
+      - "Re-raises Y instead of X."
+      - "Logs to stderr."
+    answer: 0
+    explain: "Explicit cause chaining. Without `from`, you get implicit __context__ which is messier."
+    tags: [exceptions]
+
+  - id: py-with-multiple
+    skill: python
+    prompt: "Open two files in a single `with` (3.10+)?"
+    choices:
+      - "with (open('a') as a, open('b') as b): ..."
+      - "with open('a'), open('b'): ..."
+      - "with open('a') and open('b') as ab: ..."
+      - "Cannot — must nest."
+    answer: 0
+    explain: "Parenthesised context managers (PEP 617) since 3.10."
+    tags: [syntax]
+
+  - id: py-walrus
+    skill: python
+    prompt: "Purpose of the walrus operator `:=`?"
+    choices:
+      - "Assignment expression — assign and use a value in one expression."
+      - "Type annotation shortcut."
+      - "Reverse-assignment for tuples."
+      - "Lazy evaluation marker."
+    answer: 0
+    explain: "PEP 572. Useful in `while (chunk := f.read(N)):` etc."
+    tags: [syntax]
+
+  - id: py-args-kwargs
+    skill: python
+    prompt: "What does `def f(*args, **kwargs)` collect?"
+    choices:
+      - "args = tuple of extra positional, kwargs = dict of extra keyword."
+      - "args = list, kwargs = list."
+      - "args = dict, kwargs = tuple."
+      - "Both must be passed explicitly by name."
+    answer: 0
+    explain: "Variadic capture. `*` packs positional → tuple; `**` packs keyword → dict."
+    tags: [functions]
+
+  - id: py-deepcopy
+    skill: python
+    prompt: "Difference between copy.copy and copy.deepcopy?"
+    choices:
+      - "copy = shallow (shares nested refs); deepcopy = recursive new objects."
+      - "deepcopy is faster."
+      - "copy works only on dicts; deepcopy works on all."
+      - "deepcopy returns the same object reference."
+    answer: 0
+    explain: "Shallow copies the outer container; nested mutables are still shared."
+    tags: [stdlib]
+
+  - id: py-isinstance-tuple
+    skill: python
+    prompt: "Cleanest way to check x is int or float?"
+    choices:
+      - "isinstance(x, (int, float))"
+      - "type(x) == int or type(x) == float"
+      - "x is int or x is float"
+      - "isinstance(x, int|float)  # only this form"
+    answer: 0
+    explain: "Tuple form has worked forever. Since 3.10 you can also do `isinstance(x, int|float)`."
+    tags: [typing]
+
+  - id: py-string-fmt
+    skill: python
+    prompt: "Modern preferred string formatting?"
+    choices:
+      - "f-strings: f'{x:.2f}'"
+      - "% formatting: 'x=%s' % x"
+      - "str.format: '{}'.format(x)"
+      - "string.Template"
+    answer: 0
+    explain: "f-strings (3.6+) are fastest and most readable for inline interpolation."
+    tags: [strings]
+
+  - id: py-virtualenv
+    skill: python
+    prompt: "What does `python -m venv .venv` create?"
+    choices:
+      - "Isolated environment with its own interpreter symlink and site-packages."
+      - "A globally installed Python interpreter."
+      - "A Docker container."
+      - "A shell alias only."
+    answer: 0
+    explain: "venv creates a self-contained env. Activate via .venv/bin/activate."
+    tags: [tooling]
+
+  - id: py-pip-editable
+    skill: python
+    prompt: "What does `pip install -e .` do?"
+    choices:
+      - "Installs in editable mode — changes to source reflected without reinstall."
+      - "Installs only build dependencies."
+      - "Encrypts the package."
+      - "Same as `pip install .` exactly."
+    answer: 0
+    explain: "Editable / develop install — links source. Essential for local package dev."
+    tags: [tooling]
+
+  - id: py-iter-iterator
+    skill: python
+    prompt: "Difference between iterable and iterator?"
+    choices:
+      - "Iterable has __iter__; iterator additionally has __next__ and is single-pass."
+      - "They are the same."
+      - "Iterator is just a list."
+      - "Iterable is always lazy; iterator is always eager."
+    answer: 0
+    explain: "iter(iterable) → iterator. Iterator state is consumed; iterable can produce many iterators."
+    tags: [iteration]
+
+  - id: py-pytest-fixture
+    skill: python
+    prompt: "Purpose of `@pytest.fixture`?"
+    choices:
+      - "Provide reusable setup/teardown for tests via dependency injection."
+      - "Mark a test as skipped."
+      - "Declare an expected exception."
+      - "Parametrise a test only."
+    answer: 0
+    explain: "Fixtures inject by name. yield-based fixtures handle teardown after yield."
+    tags: [pytest]
+
+  - id: py-tracking-mro
+    skill: python
+    prompt: "How is MRO (method resolution order) determined?"
+    choices:
+      - "C3 linearisation over base classes."
+      - "Left-to-right depth-first, no consistency checks."
+      - "Alphabetical."
+      - "Order of method definition."
+    answer: 0
+    explain: "C3 ensures monotonic, consistent ordering across diamond inheritance. cls.__mro__ shows it."
+    tags: [classes]

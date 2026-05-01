@@ -1,0 +1,7 @@
+id: task-hard-scheduler
+skill: python
+difficulty: hard
+title: "TaskScheduler — topo-sort with cycle detection"
+suggested_minutes: 40
+visible_tests: ["test_visible.py"]
+hidden_tests: ["test_hidden.py"]

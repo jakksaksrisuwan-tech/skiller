@@ -1,0 +1,131 @@
+skill: python
+questions:
+  - id: py-ff-list-flatten
+    skill: python
+    prompt: |
+      Given lst = [[1, 2], [3, 4], [5]], one expression that yields [1, 2, 3, 4, 5].
+      (Itertools or comprehension fine; just type the expression.)
+    patterns:
+      - '^\s*\[\s*x\s+for\s+sub(list)?\s+in\s+lst\s+for\s+x\s+in\s+sub(list)?\s*\]\s*$'
+      - '^\s*list\(\s*itertools\.chain(\.from_iterable)?\(\s*\*?lst\s*\)\s*\)\s*$'
+      - '^\s*sum\(\s*lst\s*,\s*\[\s*\]\s*\)\s*$'
+    canonical: "[x for sub in lst for x in sub]"
+    explain: "Nested comp is idiomatic; `itertools.chain.from_iterable(lst)` is faster on large input."
+    tags: [comprehensions, itertools]
+
+  - id: py-ff-dict-from-pairs
+    skill: python
+    prompt: |
+      Build a dict from list of tuples: pairs = [('a', 1), ('b', 2)].
+    patterns:
+      - '^\s*dict\(\s*pairs\s*\)\s*$'
+      - '^\s*\{\s*k\s*:\s*v\s+for\s+k\s*,\s*v\s+in\s+pairs\s*\}\s*$'
+    canonical: "dict(pairs)"
+    explain: "`dict()` accepts iterable of 2-tuples. Comprehension also fine."
+    tags: [datastructures, dict]
+
+  - id: py-ff-sort-by-len
+    skill: python
+    prompt: |
+      Sort `words` (a list[str]) in place, shortest first.
+    patterns:
+      - '^\s*words\.sort\(\s*key\s*=\s*len\s*\)\s*$'
+    canonical: "words.sort(key=len)"
+    explain: "`list.sort` is in place. `sorted(words, key=len)` returns new list."
+    tags: [sorting, builtins]
+
+  - id: py-ff-read-file
+    skill: python
+    prompt: |
+      Idiomatic context-manager read of `path.txt` into variable `text`.
+    patterns:
+      - '^\s*with\s+open\(\s*["'']path\.txt["'']\s*\)\s+as\s+\w+:\s*\n?\s*text\s*=\s*\w+\.read\(\s*\)\s*$'
+      - '^\s*text\s*=\s*Path\(\s*["'']path\.txt["'']\s*\)\.read_text\(\s*\)\s*$'
+    canonical: "text = Path('path.txt').read_text()"
+    explain: "pathlib's `Path.read_text()` is shortest. Both forms acceptable."
+    tags: [stdlib, pathlib]
+
+  - id: py-ff-counter
+    skill: python
+    prompt: |
+      Count occurrences of each char in s = "mississippi" — single line, stdlib.
+    patterns:
+      - '^\s*Counter\(\s*s\s*\)\s*$'
+      - '^\s*collections\.Counter\(\s*s\s*\)\s*$'
+    canonical: "Counter(s)"
+    explain: "collections.Counter — purpose-built. `dict(zip(*np.unique(...)))` etc are anti-patterns."
+    tags: [stdlib, collections]
+
+  - id: py-ff-asyncio-run
+    skill: python
+    prompt: |
+      Top-level call to run an async function `main()` from sync code (3.7+).
+    patterns:
+      - '^\s*asyncio\.run\(\s*main\(\s*\)\s*\)\s*$'
+    canonical: "asyncio.run(main())"
+    explain: "Manages event loop creation+close. Don't manually `loop = asyncio.new_event_loop()` for top-level."
+    tags: [asyncio]
+
+  - id: py-ff-defaultdict
+    skill: python
+    prompt: |
+      Create a dict where missing keys auto-init to empty list.
+    patterns:
+      - '^\s*defaultdict\(\s*list\s*\)\s*$'
+      - '^\s*collections\.defaultdict\(\s*list\s*\)\s*$'
+    canonical: "defaultdict(list)"
+    explain: "Factory `list` (the type, not list()) called per missing key."
+    tags: [stdlib, collections]
+
+  - id: py-ff-list-comp-filter
+    skill: python
+    prompt: |
+      Squares of even numbers in nums (list of ints) — single comprehension.
+    patterns:
+      - '^\s*\[\s*(n|x|i)\s*\*\s*\1\s+for\s+\1\s+in\s+nums\s+if\s+\1\s*%\s*2\s*==\s*0\s*\]\s*$'
+      - '^\s*\[\s*(n|x|i)\s*\*\*\s*2\s+for\s+\1\s+in\s+nums\s+if\s+\1\s*%\s*2\s*==\s*0\s*\]\s*$'
+    canonical: "[n * n for n in nums if n % 2 == 0]"
+    explain: "Filter clause goes after the `for`. `n*n` is faster than `n**2` for ints."
+    tags: [comprehensions]
+
+  - id: py-ff-fstring-fmt
+    skill: python
+    prompt: |
+      f-string that prints `pi` rounded to 3 decimals, padded to width 8.
+    patterns:
+      - '^\s*f["'']\{pi:8\.3f\}["'']\s*$'
+    canonical: "f\"{pi:8.3f}\""
+    explain: "Format spec: width.precision + type. `8.3f` = width 8, 3 decimals, fixed-point."
+    tags: [strings, formatting]
+
+  - id: py-ff-zip-pairs
+    skill: python
+    prompt: |
+      Pair consecutive elements: from a = [1, 2, 3, 4] yield (1,2), (2,3), (3,4) — single zip.
+    patterns:
+      - '^\s*zip\(\s*a\s*,\s*a\[\s*1:\s*\]\s*\)\s*$'
+      - '^\s*list\(\s*zip\(\s*a\s*,\s*a\[\s*1:\s*\]\s*\)\s*\)\s*$'
+    canonical: "zip(a, a[1:])"
+    explain: "Classic pairwise idiom. Python 3.10+: `itertools.pairwise(a)`."
+    tags: [iteration, itertools]
+
+  - id: py-ff-typing-list-int
+    skill: python
+    prompt: |
+      Type annotation for "list of ints" using PEP 585 (3.9+) builtin generic.
+    patterns:
+      - '^\s*list\[int\]\s*$'
+    canonical: "list[int]"
+    explain: "Lowercase `list[int]` since 3.9. `List[int]` from typing is the older form."
+    tags: [typing]
+
+  - id: py-ff-suppress-exception
+    skill: python
+    prompt: |
+      Use contextlib to ignore FileNotFoundError around `Path('x').unlink()`.
+    patterns:
+      - '^\s*with\s+suppress\(\s*FileNotFoundError\s*\)\s*:\s*\n?\s*Path\(\s*["'']x["'']\s*\)\.unlink\(\s*\)\s*$'
+      - '^\s*with\s+contextlib\.suppress\(\s*FileNotFoundError\s*\)\s*:\s*\n?\s*Path\(\s*["'']x["'']\s*\)\.unlink\(\s*\)\s*$'
+    canonical: "with suppress(FileNotFoundError): Path('x').unlink()"
+    explain: "`contextlib.suppress` is cleaner than try/except/pass for known-okay misses."
+    tags: [stdlib, contextlib]

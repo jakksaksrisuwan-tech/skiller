@@ -1,0 +1,7 @@
+id: task-practice-sum-even
+skill: python
+difficulty: practice
+title: "sum_even — environment warmup"
+suggested_minutes: 5
+visible_tests: ["test_visible.py"]
+hidden_tests: []

@@ -1,0 +1,39 @@
+# skiller runtime state
+.skiller_state.json
+.dev_state.json
+debug.sock
+
+# pytest artifacts written by test_runner
+content/python_tasks/*/.report.json
+content/python_tasks/*/work/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# venv / uv
+.venv/
+.python-version
+
+# tools
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# build
+dist/
+build/
+*.egg-info/
+
+# OS / editor
+.DS_Store
+*.swp
+*.swo
+*.bak
+*.tmp
+.idea/
+.vscode/

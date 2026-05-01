@@ -1,0 +1,107 @@
+skill: linux
+questions:
+  - id: lin-ff-count-err
+    skill: linux
+    prompt: |
+      Type the command to count lines containing "ERROR" in /var/log/app.log.
+    patterns:
+      - '^\s*grep\s+-c\s+["'']?ERROR["'']?\s+/var/log/app\.log\s*$'
+      - '^\s*grep\s+["'']?ERROR["'']?\s+/var/log/app\.log\s*\|\s*wc\s+-l\s*$'
+    canonical: "grep -c ERROR /var/log/app.log"
+    explain: "`grep -c` prints match count. Pipe to `wc -l` works too."
+    tags: [grep]
+
+  - id: lin-ff-find-large
+    skill: linux
+    prompt: |
+      Type a command to find all files larger than 100MB under /home (path matters).
+    patterns:
+      - '^\s*find\s+/home\s+(-type\s+f\s+)?-size\s+\+100M\b.*$'
+    canonical: "find /home -type f -size +100M"
+    explain: "`-size +100M` matches > 100 megabytes. `-type f` filters out directories."
+    tags: [find, disk]
+
+  - id: lin-ff-list-listen
+    skill: linux
+    prompt: |
+      Type a command to list listening TCP sockets (any tool, but show ports numerically).
+    patterns:
+      - '^\s*ss\s+-tln[p]?\s*$'
+      - '^\s*netstat\s+-tln[p]?\s*$'
+    canonical: "ss -tln"
+    explain: "ss is the modern replacement for netstat. Flags: t=tcp, l=listen, n=numeric."
+    tags: [network]
+
+  - id: lin-ff-perm-rwx
+    skill: linux
+    prompt: |
+      Octal mode where owner has rwx, group has r-x, others have nothing?
+    patterns:
+      - '^\s*0?750\s*$'
+    canonical: "750"
+    explain: "rwx=7, r-x=5, ---=0. Order: u, g, o."
+    tags: [permissions]
+
+  - id: lin-ff-kill-9
+    skill: linux
+    prompt: |
+      Force-kill a process with PID 4321 (cannot be ignored).
+    patterns:
+      - '^\s*kill\s+-9\s+4321\s*$'
+      - '^\s*kill\s+-s\s+(SIG)?KILL\s+4321\s*$'
+    canonical: "kill -9 4321"
+    explain: "SIGKILL (9) cannot be caught/ignored. Prefer SIGTERM (default) first."
+    tags: [signals, processes]
+
+  - id: lin-ff-chmod-sym
+    skill: linux
+    prompt: |
+      Symbolic chmod to add execute for owner only on script.sh.
+    patterns:
+      - '^\s*chmod\s+u\+x\s+script\.sh\s*$'
+    canonical: "chmod u+x script.sh"
+    explain: "u=owner, +x=add execute. Symbolic ops compose: `g-w`, `o=r`, etc."
+    tags: [permissions]
+
+  - id: lin-ff-tail-follow
+    skill: linux
+    prompt: |
+      Stream new lines as they're appended to /var/log/syslog.
+    patterns:
+      - '^\s*tail\s+-f\s+/var/log/syslog\s*$'
+      - '^\s*tail\s+-F\s+/var/log/syslog\s*$'
+    canonical: "tail -f /var/log/syslog"
+    explain: "`-f` follows. `-F` follows by name and re-opens on rotation."
+    tags: [logs]
+
+  - id: lin-ff-ps-grep
+    skill: linux
+    prompt: |
+      Show all running processes whose command contains "nginx".
+    patterns:
+      - '^\s*ps\s+(aux|-ef)\s*\|\s*grep\s+["'']?\[?n\]?ginx["'']?\s*$'
+      - '^\s*pgrep\s+(-a\s+)?(-l\s+)?nginx\s*$'
+    canonical: "pgrep -a nginx   # or:  ps aux | grep nginx"
+    explain: "pgrep filters by name. `[n]ginx` trick keeps grep itself out of results."
+    tags: [processes]
+
+  - id: lin-ff-disk-free
+    skill: linux
+    prompt: |
+      Show free disk space on all mounted filesystems, human-readable.
+    patterns:
+      - '^\s*df\s+-h\s*$'
+    canonical: "df -h"
+    explain: "`-h` = human readable (KB/MB/GB)."
+    tags: [disk]
+
+  - id: lin-ff-curl-headers
+    skill: linux
+    prompt: |
+      Fetch only the response headers of https://example.com/.
+    patterns:
+      - '^\s*curl\s+-I\s+https?://example\.com/?\s*$'
+      - '^\s*curl\s+--head\s+https?://example\.com/?\s*$'
+    canonical: "curl -I https://example.com/"
+    explain: "`-I` (--head) issues HEAD and prints response headers."
+    tags: [network, http]

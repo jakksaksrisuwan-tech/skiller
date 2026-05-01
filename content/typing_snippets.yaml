@@ -1,0 +1,257 @@
+snippets:
+  # ── list comprehension ───────────────────────────────────────────
+  - id: ts-listcomp-1
+    structure: list_comp
+    difficulty: 1
+    text: "[x * 2 for x in nums]"
+    tags: [comprehensions]
+  - id: ts-listcomp-2
+    structure: list_comp
+    difficulty: 2
+    text: "[n for n in nums if n > 0]"
+    tags: [comprehensions, filter]
+  - id: ts-listcomp-3
+    structure: list_comp
+    difficulty: 3
+    text: "[(i, x) for i, x in enumerate(items)]"
+    tags: [comprehensions, enumerate]
+  - id: ts-listcomp-4
+    structure: list_comp
+    difficulty: 3
+    text: "[w.lower() for w in words if w.isalpha()]"
+    tags: [comprehensions, strings]
+
+  # ── dict comprehension ───────────────────────────────────────────
+  - id: ts-dictcomp-1
+    structure: dict_comp
+    difficulty: 1
+    text: "{k: v for k, v in pairs}"
+    tags: [comprehensions, dict]
+  - id: ts-dictcomp-2
+    structure: dict_comp
+    difficulty: 2
+    text: "{x: x * x for x in range(10)}"
+    tags: [comprehensions, dict]
+  - id: ts-dictcomp-3
+    structure: dict_comp
+    difficulty: 3
+    text: "{k: v for k, v in d.items() if v}"
+    tags: [comprehensions, dict, filter]
+
+  # ── set & gen ────────────────────────────────────────────────────
+  - id: ts-setcomp-1
+    structure: set_comp
+    difficulty: 3
+    text: "{x.strip() for x in lines if x}"
+    tags: [comprehensions, set]
+  - id: ts-genexpr-1
+    structure: gen_expr
+    difficulty: 2
+    text: "sum(x * x for x in nums)"
+    tags: [generators]
+  - id: ts-genexpr-2
+    structure: gen_expr
+    difficulty: 2
+    text: "any(c.isdigit() for c in s)"
+    tags: [generators]
+
+  # ── lambda ───────────────────────────────────────────────────────
+  - id: ts-lambda-1
+    structure: lambda
+    difficulty: 2
+    text: "sorted(items, key=lambda x: x.name)"
+    tags: [lambda, sorting]
+  - id: ts-lambda-2
+    structure: lambda
+    difficulty: 3
+    text: "list(filter(lambda n: n % 2 == 0, nums))"
+    tags: [lambda, filter]
+  - id: ts-lambda-3
+    structure: lambda
+    difficulty: 2
+    text: "max(words, key=lambda w: len(w))"
+    tags: [lambda]
+
+  # ── with / context ───────────────────────────────────────────────
+  - id: ts-withas-1
+    structure: with_as
+    difficulty: 3
+    text: "with open(path, 'r', encoding='utf-8') as f:"
+    tags: [context-manager, io]
+  - id: ts-withas-2
+    structure: with_as
+    difficulty: 2
+    text: "with suppress(FileNotFoundError):"
+    tags: [context-manager, exceptions]
+  - id: ts-withas-3
+    structure: with_as
+    difficulty: 3
+    text: "with contextlib.ExitStack() as stack:"
+    tags: [context-manager]
+
+  # ── try / except ─────────────────────────────────────────────────
+  - id: ts-tryex-1
+    structure: try_except
+    difficulty: 2
+    text: "except (KeyError, ValueError) as e:"
+    tags: [exceptions]
+  - id: ts-tryex-2
+    structure: try_except
+    difficulty: 3
+    text: "raise ValueError(f'invalid: {x!r}') from e"
+    tags: [exceptions, fstring]
+
+  # ── def signature ────────────────────────────────────────────────
+  - id: ts-def-1
+    structure: def_signature
+    difficulty: 2
+    text: "def fn(x: int, y: int = 0) -> int:"
+    tags: [typing]
+  - id: ts-def-2
+    structure: def_signature
+    difficulty: 3
+    text: "def parse(text: str) -> dict[str, list[int]]:"
+    tags: [typing]
+  - id: ts-def-3
+    structure: def_signature
+    difficulty: 3
+    text: "def __init__(self, *, name: str, age: int = 0) -> None:"
+    tags: [classes, typing]
+
+  # ── decorator ────────────────────────────────────────────────────
+  - id: ts-deco-1
+    structure: decorator
+    difficulty: 2
+    text: "@functools.lru_cache(maxsize=128)"
+    tags: [decorators, functools]
+  - id: ts-deco-2
+    structure: decorator
+    difficulty: 2
+    text: "@dataclass(frozen=True, slots=True)"
+    tags: [decorators, dataclass]
+  - id: ts-deco-3
+    structure: decorator
+    difficulty: 1
+    text: "@property"
+    tags: [decorators, classes]
+
+  # ── f-string ─────────────────────────────────────────────────────
+  - id: ts-fstr-1
+    structure: fstring
+    difficulty: 2
+    text: "f'{name}={value!r}'"
+    tags: [fstring, formatting]
+  - id: ts-fstr-2
+    structure: fstring
+    difficulty: 1
+    text: "f'{pi:8.3f}'"
+    tags: [fstring, formatting]
+  - id: ts-fstr-3
+    structure: fstring
+    difficulty: 3
+    text: "f'[{i:03d}/{total}] {msg}'"
+    tags: [fstring, formatting]
+
+  # ── import ───────────────────────────────────────────────────────
+  - id: ts-import-1
+    structure: import_stmt
+    difficulty: 2
+    text: "from collections import defaultdict, Counter"
+    tags: [imports, stdlib]
+  - id: ts-import-2
+    structure: import_stmt
+    difficulty: 1
+    text: "from pathlib import Path"
+    tags: [imports, stdlib]
+  - id: ts-import-3
+    structure: import_stmt
+    difficulty: 2
+    text: "from typing import Any, Iterable, Iterator"
+    tags: [imports, typing]
+
+  # ── class def ────────────────────────────────────────────────────
+  - id: ts-class-1
+    structure: class_def
+    difficulty: 3
+    text: "class Foo(Bar, metaclass=ABCMeta):"
+    tags: [classes]
+  - id: ts-class-2
+    structure: class_def
+    difficulty: 2
+    text: "class Result(NamedTuple):"
+    tags: [classes, typing]
+
+  # ── slicing / indexing ───────────────────────────────────────────
+  - id: ts-slice-1
+    structure: slicing
+    difficulty: 1
+    text: "items[start:stop:step]"
+    tags: [slicing]
+  - id: ts-slice-2
+    structure: slicing
+    difficulty: 2
+    text: "''.join(reversed(s))"
+    tags: [strings]
+  - id: ts-slice-3
+    structure: slicing
+    difficulty: 1
+    text: "s[::-1]"
+    tags: [slicing]
+
+  # ── regex ────────────────────────────────────────────────────────
+  - id: ts-re-1
+    structure: regex
+    difficulty: 3
+    text: "re.compile(r'\\d+', re.IGNORECASE)"
+    tags: [regex]
+  - id: ts-re-2
+    structure: regex
+    difficulty: 3
+    text: "re.findall(r'\\b\\w+\\b', text)"
+    tags: [regex]
+
+  # ── async / await ────────────────────────────────────────────────
+  - id: ts-async-1
+    structure: async_await
+    difficulty: 2
+    text: "async def fetch(url: str) -> dict:"
+    tags: [asyncio]
+  - id: ts-async-2
+    structure: async_await
+    difficulty: 3
+    text: "results = await asyncio.gather(*tasks)"
+    tags: [asyncio]
+  - id: ts-async-3
+    structure: async_await
+    difficulty: 3
+    text: "async with aiohttp.ClientSession() as session:"
+    tags: [asyncio, context-manager]
+
+  # ── walrus / match ───────────────────────────────────────────────
+  - id: ts-walrus-1
+    structure: walrus
+    difficulty: 3
+    text: "while (chunk := f.read(4096)):"
+    tags: [syntax]
+  - id: ts-match-1
+    structure: match_stmt
+    difficulty: 2
+    text: "case [first, *rest]:"
+    tags: [match, syntax]
+  - id: ts-match-2
+    structure: match_stmt
+    difficulty: 3
+    text: "case Point(x=0, y=y):"
+    tags: [match, syntax]
+
+  # ── ternary ──────────────────────────────────────────────────────
+  - id: ts-ternary-1
+    structure: ternary
+    difficulty: 1
+    text: "value if condition else default"
+    tags: [syntax]
+  - id: ts-ternary-2
+    structure: ternary
+    difficulty: 2
+    text: "x = a if a is not None else b"
+    tags: [syntax]

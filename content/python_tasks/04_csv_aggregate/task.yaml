@@ -1,0 +1,9 @@
+id: task-csv-aggregate
+skill: python
+difficulty: medium
+title: "csv_aggregate — parse, count, filter, sort"
+suggested_minutes: 40
+target_first_pass_minutes: 20
+target_complete_minutes: 40
+visible_tests: ["test_visible.py"]
+hidden_tests: ["test_hidden.py"]
