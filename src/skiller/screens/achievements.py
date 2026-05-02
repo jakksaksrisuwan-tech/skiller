@@ -5,7 +5,6 @@ unlocked achievements display the full punny name + tier glyph + earned date.
 """
 from __future__ import annotations
 
-import time
 from datetime import datetime
 
 from textual.app import ComposeResult
@@ -60,7 +59,7 @@ class AchievementsScreen(Screen):
                     if earned_ts else "—"
                 )
             else:
-                mark = f"[dim]·[/dim]"
+                mark = "[dim]·[/dim]"
                 name = "[dim italic]???[/dim italic]"
                 desc = f"[dim]{r['desc']}[/dim]"
                 if r["target"]:

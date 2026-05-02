@@ -1,0 +1,1267 @@
+snippets:
+  # ── ls / cd / pwd / df / du ──────────────────────────────────────
+  - id: lx-ls-1
+    structure: ls_dir
+    language: linux
+    difficulty: 1
+    text: "ls -la"
+    description: "list all files (incl. hidden) with details"
+  - id: lx-ls-2
+    structure: ls_dir
+    language: linux
+    difficulty: 2
+    text: "ls -lhSr"
+    description: "list by size ascending (smallest first), human-readable"
+  - id: lx-ls-3
+    structure: ls_dir
+    language: linux
+    difficulty: 2
+    text: "ls -la /etc/ | grep '^d'"
+    description: "list only directories under /etc"
+  - id: lx-pwd-1
+    structure: ls_dir
+    language: linux
+    difficulty: 1
+    text: "pwd"
+    description: "print working directory"
+  - id: lx-cd-1
+    structure: ls_dir
+    language: linux
+    difficulty: 1
+    text: "cd ~/projects"
+    description: "change to ~/projects"
+  - id: lx-df-1
+    structure: ls_dir
+    language: linux
+    difficulty: 1
+    text: "df -h"
+    description: "show free disk space, human-readable"
+  - id: lx-du-1
+    structure: ls_dir
+    language: linux
+    difficulty: 2
+    text: "du -sh ./*"
+    description: "summary size of each item in the current dir"
+  - id: lx-du-2
+    structure: ls_dir
+    language: linux
+    difficulty: 3
+    text: "du -h --max-depth=1 | sort -hr | head"
+    description: "top 10 largest first-level subdirs by size"
+
+  # ── find ─────────────────────────────────────────────────────────
+  - id: lx-find-1
+    structure: find_basic
+    language: linux
+    difficulty: 2
+    text: "find . -name '*.log'"
+    description: "find all .log files recursively"
+  - id: lx-find-2
+    structure: find_basic
+    language: linux
+    difficulty: 2
+    text: "find /var -type f -name '*.conf'"
+    description: "find regular files (not dirs) named *.conf under /var"
+  - id: lx-find-3
+    structure: find_filter
+    language: linux
+    difficulty: 3
+    text: "find /var -name '*.log' -mtime -7"
+    description: "find logs modified in the last 7 days"
+  - id: lx-find-4
+    structure: find_filter
+    language: linux
+    difficulty: 3
+    text: "find . -type f -size +100M -exec ls -lh {} +"
+    description: "list files larger than 100 MB, human-readable"
+  - id: lx-find-5
+    structure: find_exec
+    language: linux
+    difficulty: 3
+    text: "find /tmp -name '*.tmp' -print0 | xargs -0 rm -f"
+    description: "delete *.tmp under /tmp safely (handles spaces/newlines in names)"
+  - id: lx-find-6
+    structure: find_exec
+    language: linux
+    difficulty: 3
+    text: "find . -name '*.pyc' -delete"
+    description: "delete all .pyc files (faster built-in than -exec rm)"
+
+  # ── grep ─────────────────────────────────────────────────────────
+  - id: lx-grep-1
+    structure: grep_basic
+    language: linux
+    difficulty: 2
+    text: "grep -c 'ERROR' app.log"
+    description: "count occurrences of 'ERROR' in app.log"
+  - id: lx-grep-2
+    structure: grep_basic
+    language: linux
+    difficulty: 2
+    text: "grep -i 'warning' /var/log/syslog"
+    description: "case-insensitive search for 'warning'"
+  - id: lx-grep-3
+    structure: grep_recursive
+    language: linux
+    difficulty: 2
+    text: "grep -r 'TODO' src/"
+    description: "recursively grep for 'TODO' under src/"
+  - id: lx-grep-4
+    structure: grep_recursive
+    language: linux
+    difficulty: 3
+    text: "grep -rn --include='*.py' 'def main' src/"
+    description: "find 'def main' in .py files only, with line numbers"
+  - id: lx-grep-5
+    structure: grep_regex
+    language: linux
+    difficulty: 3
+    text: "grep -E '^(error|warn):' app.log | wc -l"
+    description: "count lines starting with 'error:' or 'warn:'"
+
+  # ── awk / sed ────────────────────────────────────────────────────
+  - id: lx-awk-1
+    structure: awk_field
+    language: linux
+    difficulty: 3
+    text: "awk -F: '{print $1, $3}' /etc/passwd"
+    description: "print username and uid from /etc/passwd"
+  - id: lx-awk-2
+    structure: awk_field
+    language: linux
+    difficulty: 3
+    text: "awk '/error/ {count++} END {print count}' app.log"
+    description: "count lines matching /error/"
+  - id: lx-sed-1
+    structure: sed_inplace
+    language: linux
+    difficulty: 3
+    text: "sed -i 's/foo/bar/g' file.txt"
+    description: "in-place global substitute foo→bar in file.txt"
+  - id: lx-sed-2
+    structure: sed_inplace
+    language: linux
+    difficulty: 3
+    text: "sed -n '10,20p' file.txt"
+    description: "print only lines 10-20 of file.txt"
+
+  # ── permissions / ownership ──────────────────────────────────────
+  - id: lx-chmod-1
+    structure: chmod_octal
+    language: linux
+    difficulty: 2
+    text: "chmod 755 script.sh"
+    description: "owner rwx, group/other r-x"
+  - id: lx-chmod-2
+    structure: chmod_octal
+    language: linux
+    difficulty: 2
+    text: "chmod -R 644 docs/"
+    description: "recursively set rw-r--r-- on docs/"
+  - id: lx-chmod-3
+    structure: chmod_octal
+    language: linux
+    difficulty: 1
+    text: "chmod +x deploy.sh"
+    description: "add execute bit for everyone"
+  - id: lx-chown-1
+    structure: chown_user
+    language: linux
+    difficulty: 2
+    text: "chown user:group file.txt"
+    description: "change owner to user, group to group"
+  - id: lx-chown-2
+    structure: chown_user
+    language: linux
+    difficulty: 3
+    text: "sudo chown -R www-data:www-data /var/www/"
+    description: "recursively give www-data ownership of /var/www"
+
+  # ── archives ─────────────────────────────────────────────────────
+  - id: lx-tar-1
+    structure: tar_extract
+    language: linux
+    difficulty: 2
+    text: "tar -xzvf archive.tar.gz"
+    description: "extract gzip-compressed tar, verbose"
+  - id: lx-tar-2
+    structure: tar_create
+    language: linux
+    difficulty: 3
+    text: "tar -czvf backup.tar.gz src/"
+    description: "create gzip-compressed tar of src/"
+  - id: lx-tar-3
+    structure: tar_create
+    language: linux
+    difficulty: 3
+    text: "tar -czf out.tar.gz --exclude='*.tmp' src/"
+    description: "create archive excluding .tmp files"
+
+  # ── processes ────────────────────────────────────────────────────
+  - id: lx-ps-1
+    structure: ps_grep
+    language: linux
+    difficulty: 2
+    text: "ps aux | grep nginx"
+    description: "find nginx-related processes"
+  - id: lx-ps-2
+    structure: ps_grep
+    language: linux
+    difficulty: 2
+    text: "pgrep -a python"
+    description: "list pids + cmdlines of python processes"
+  - id: lx-kill-1
+    structure: kill_pid
+    language: linux
+    difficulty: 1
+    text: "kill -9 1234"
+    description: "force-kill pid 1234 (SIGKILL)"
+  - id: lx-kill-2
+    structure: kill_pid
+    language: linux
+    difficulty: 2
+    text: "killall -TERM nginx"
+    description: "send SIGTERM to all 'nginx' processes by name"
+
+  # ── network ──────────────────────────────────────────────────────
+  - id: lx-ss-1
+    structure: ss_tcp
+    language: linux
+    difficulty: 2
+    text: "ss -tlnp"
+    description: "list listening TCP ports + owning process (modern netstat)"
+  - id: lx-ss-2
+    structure: ss_tcp
+    language: linux
+    difficulty: 3
+    text: "ss -tlnp | grep ':443'"
+    description: "what's listening on 443?"
+  - id: lx-ssh-1
+    structure: ssh_remote
+    language: linux
+    difficulty: 2
+    text: "ssh user@host 'uptime'"
+    description: "run uptime on remote host, return locally"
+  - id: lx-ssh-2
+    structure: ssh_remote
+    language: linux
+    difficulty: 3
+    text: "ssh -i ~/.ssh/id_ed25519 user@host"
+    description: "ssh using a specific identity key"
+  - id: lx-scp-1
+    structure: scp_copy
+    language: linux
+    difficulty: 3
+    text: "scp -r ./build user@host:/var/www/"
+    description: "recursively copy build/ to remote /var/www/"
+  - id: lx-curl-1
+    structure: curl_head
+    language: linux
+    difficulty: 2
+    text: "curl -I https://example.com/"
+    description: "fetch only response headers (HEAD)"
+  - id: lx-curl-2
+    structure: curl_get
+    language: linux
+    difficulty: 3
+    text: "curl -sSL https://example.com/api -H 'Accept: application/json'"
+    description: "silent + show errors + follow redirects, JSON Accept"
+
+  # ── systemd / journal ────────────────────────────────────────────
+  - id: lx-sysctl-1
+    structure: systemd_status
+    language: linux
+    difficulty: 2
+    text: "systemctl status nginx"
+    description: "show nginx unit state + tail of journal"
+  - id: lx-sysctl-2
+    structure: systemd_status
+    language: linux
+    difficulty: 2
+    text: "sudo systemctl restart docker"
+    description: "restart the docker service"
+  - id: lx-journal-1
+    structure: journalctl
+    language: linux
+    difficulty: 3
+    text: "journalctl -u nginx --since '1 hour ago'"
+    description: "nginx logs from the last hour"
+  - id: lx-journal-2
+    structure: journalctl
+    language: linux
+    difficulty: 3
+    text: "journalctl -f -u kubelet"
+    description: "follow kubelet logs (tail -f equivalent)"
+
+  # ── git ──────────────────────────────────────────────────────────
+  - id: lx-git-1
+    structure: git_log
+    language: linux
+    difficulty: 2
+    text: "git log --oneline -10"
+    description: "last 10 commits, one line each"
+  - id: lx-git-2
+    structure: git_log
+    language: linux
+    difficulty: 3
+    text: "git log --oneline --graph --decorate --all"
+    description: "ASCII commit graph across all branches"
+  - id: lx-git-3
+    structure: git_branch
+    language: linux
+    difficulty: 2
+    text: "git checkout -b feature/fix-bug"
+    description: "create + switch to a new branch"
+  - id: lx-git-4
+    structure: git_branch
+    language: linux
+    difficulty: 2
+    text: "git rebase -i HEAD~3"
+    description: "interactive rebase of last 3 commits"
+  - id: lx-git-5
+    structure: git_diff
+    language: linux
+    difficulty: 2
+    text: "git diff --stat HEAD~1"
+    description: "summary of changes since previous commit"
+
+  # ── pipe / redirect ──────────────────────────────────────────────
+  - id: lx-pipe-1
+    structure: pipe_filter
+    language: linux
+    difficulty: 2
+    text: "cat /etc/passwd | sort | uniq | head"
+    description: "first 10 unique sorted lines of passwd"
+  - id: lx-pipe-2
+    structure: pipe_chain
+    language: linux
+    difficulty: 3
+    text: "ls -la | awk '{print $5, $9}' | sort -nr | head"
+    description: "10 largest files by size in current dir"
+  - id: lx-redir-1
+    structure: redirect
+    language: linux
+    difficulty: 2
+    text: "command 2>&1 | tee output.log"
+    description: "merge stderr→stdout, save to log AND show on terminal"
+  - id: lx-redir-2
+    structure: redirect
+    language: linux
+    difficulty: 1
+    text: "echo hello > out.txt"
+    description: "write 'hello' to out.txt (overwrites)"
+
+  # ── shell loops / vars ───────────────────────────────────────────
+  - id: lx-loop-1
+    structure: shell_loop
+    language: linux
+    difficulty: 3
+    text: "for f in *.txt; do mv \"$f\" \"${f%.txt}.md\"; done"
+    description: "rename every .txt to .md in current dir"
+  - id: lx-loop-2
+    structure: shell_loop
+    language: linux
+    difficulty: 3
+    text: "while read line; do echo \"got: $line\"; done < input.txt"
+    description: "read input.txt line by line"
+  - id: lx-var-1
+    structure: shell_var
+    language: linux
+    difficulty: 2
+    text: "export PATH=\"$HOME/.local/bin:$PATH\""
+    description: "prepend ~/.local/bin to PATH for current shell"
+
+  # ── containers / k8s ─────────────────────────────────────────────
+  - id: lx-docker-1
+    structure: docker_ps
+    language: linux
+    difficulty: 2
+    text: "docker ps -a"
+    description: "list all containers (running + stopped)"
+  - id: lx-docker-2
+    structure: docker_ps
+    language: linux
+    difficulty: 3
+    text: "docker ps --format '{{.Names}}: {{.Status}}'"
+    description: "name: status pretty-print"
+  - id: lx-docker-3
+    structure: docker_ps
+    language: linux
+    difficulty: 3
+    text: "docker run --rm -it -v $(pwd):/work alpine sh"
+    description: "interactive alpine shell with pwd mounted; auto-remove"
+  # ── apt / dpkg (Ubuntu) ──────────────────────────────────────────
+  - id: lx-apt-1
+    structure: apt
+    language: linux
+    difficulty: 2
+    text: "sudo apt update && sudo apt upgrade -y"
+    description: "refresh package lists then upgrade everything"
+  - id: lx-apt-2
+    structure: apt
+    language: linux
+    difficulty: 2
+    text: "sudo apt install -y nginx postgresql redis"
+    description: "install nginx + postgres + redis non-interactively"
+  - id: lx-apt-3
+    structure: apt
+    language: linux
+    difficulty: 2
+    text: "apt list --installed | grep python"
+    description: "find installed packages with 'python' in the name"
+  - id: lx-dpkg-1
+    structure: apt
+    language: linux
+    difficulty: 3
+    text: "dpkg -L python3 | grep '^/usr/bin'"
+    description: "files installed by python3 package under /usr/bin"
+  - id: lx-snap-1
+    structure: apt
+    language: linux
+    difficulty: 2
+    text: "sudo snap install --classic code"
+    description: "install VS Code via snap with classic confinement"
+
+  # ── shell expansion / substitution ───────────────────────────────
+  - id: lx-cmdsubst-1
+    structure: shell_subst
+    language: linux
+    difficulty: 2
+    text: "echo \"today: $(date +%F)\""
+    description: "embed date YYYY-MM-DD in a string"
+  - id: lx-cmdsubst-2
+    structure: shell_subst
+    language: linux
+    difficulty: 3
+    text: "files=($(find . -name '*.py' -mtime -1))"
+    description: "store recent .py files into a bash array"
+  - id: lx-cmdsubst-3
+    structure: shell_subst
+    language: linux
+    difficulty: 3
+    text: "if [[ -z \"${VAR:-}\" ]]; then echo missing; fi"
+    description: "warn if VAR is unset/empty (safe with set -u)"
+
+  # ── jq / yq ──────────────────────────────────────────────────────
+  - id: lx-jq-1
+    structure: jq
+    language: linux
+    difficulty: 2
+    text: "jq -r '.name' user.json"
+    description: "extract .name as raw string (no quotes)"
+  - id: lx-jq-2
+    structure: jq
+    language: linux
+    difficulty: 3
+    text: "curl -s api/users | jq '.[] | {id, name}'"
+    description: "stream users, project to {id, name} objects"
+  - id: lx-jq-3
+    structure: jq
+    language: linux
+    difficulty: 3
+    text: "jq 'map(select(.active)) | length' users.json"
+    description: "count users where .active is truthy"
+
+  # ── advanced grep / awk / sed ────────────────────────────────────
+  - id: lx-grep-pcre
+    structure: grep_regex
+    language: linux
+    difficulty: 3
+    text: "grep -P '\\b(TODO|FIXME)\\b' src/**/*.py"
+    description: "PCRE word-boundary match for TODO|FIXME"
+  - id: lx-awk-multi
+    structure: awk_field
+    language: linux
+    difficulty: 3
+    text: "awk -F, 'NR>1 && $3 > 100 {sum += $3} END {print sum}' data.csv"
+    description: "skip header, sum column 3 where value > 100"
+  - id: lx-sed-multi
+    structure: sed_inplace
+    language: linux
+    difficulty: 3
+    text: "sed -i -e 's/foo/bar/g' -e '/^#/d' file.txt"
+    description: "substitute and delete comment lines in one pass"
+
+  # ── xargs ────────────────────────────────────────────────────────
+  - id: lx-xargs-1
+    structure: xargs
+    language: linux
+    difficulty: 3
+    text: "find . -name '*.tmp' -print0 | xargs -0 -r rm -f"
+    description: "delete .tmp files; -r skips empty input"
+  - id: lx-xargs-2
+    structure: xargs
+    language: linux
+    difficulty: 3
+    text: "cat urls.txt | xargs -n1 -P4 curl -sSL"
+    description: "fetch each URL, 4 in parallel"
+  - id: lx-xargs-3
+    structure: xargs
+    language: linux
+    difficulty: 3
+    text: "ls *.log | xargs -I{} mv {} archive/{}.bak"
+    description: "move each log into archive/ with .bak suffix"
+
+  # ── ssh advanced / scp / rsync ───────────────────────────────────
+  - id: lx-ssh-tunnel
+    structure: ssh_remote
+    language: linux
+    difficulty: 3
+    text: "ssh -fN -L 8080:localhost:80 user@host"
+    description: "background-tunnel remote :80 to local :8080"
+  - id: lx-ssh-config
+    structure: ssh_remote
+    language: linux
+    difficulty: 2
+    text: "ssh -F ~/.ssh/config production"
+    description: "use a specific ssh config alias"
+  - id: lx-rsync-1
+    structure: rsync
+    language: linux
+    difficulty: 3
+    text: "rsync -avz --delete ./build/ user@host:/var/www/"
+    description: "mirror build/ to remote, removing remote-only files"
+  - id: lx-rsync-2
+    structure: rsync
+    language: linux
+    difficulty: 3
+    text: "rsync -av --exclude='*.pyc' src/ /backup/src/"
+    description: "back up src/ excluding .pyc files"
+
+  # ── cron / at ────────────────────────────────────────────────────
+  - id: lx-cron-1
+    structure: cron
+    language: linux
+    difficulty: 2
+    text: "crontab -e"
+    description: "edit current user's cron table"
+  - id: lx-cron-2
+    structure: cron
+    language: linux
+    difficulty: 3
+    text: "*/5 * * * * /usr/local/bin/sync.sh >> /var/log/sync.log 2>&1"
+    description: "run sync.sh every 5 minutes, append all output to log"
+
+  # ── env / sourcing ───────────────────────────────────────────────
+  - id: lx-env-1
+    structure: shell_var
+    language: linux
+    difficulty: 2
+    text: "source ~/.bashrc"
+    description: "reload bash config in current shell"
+  - id: lx-env-2
+    structure: shell_var
+    language: linux
+    difficulty: 3
+    text: "set -a; source .env; set +a"
+    description: "auto-export every variable defined in .env"
+
+  # ── disk / filesystem ────────────────────────────────────────────
+  - id: lx-mount
+    structure: disk
+    language: linux
+    difficulty: 3
+    text: "sudo mount -t ext4 /dev/sdb1 /mnt/data"
+    description: "mount ext4 partition at /mnt/data"
+  - id: lx-lsblk
+    structure: disk
+    language: linux
+    difficulty: 1
+    text: "lsblk -f"
+    description: "list block devices with filesystem info"
+  - id: lx-lsof
+    structure: process
+    language: linux
+    difficulty: 2
+    text: "lsof -i :8080"
+    description: "what process is using port 8080?"
+
+  # ── monitoring / measurement ─────────────────────────────────────
+  - id: lx-watch
+    structure: monitoring
+    language: linux
+    difficulty: 2
+    text: "watch -n 2 'df -h | grep /var'"
+    description: "refresh /var disk usage every 2 seconds"
+  - id: lx-time
+    structure: monitoring
+    language: linux
+    difficulty: 1
+    text: "time make build"
+    description: "time how long `make build` takes"
+  - id: lx-uptime
+    structure: monitoring
+    language: linux
+    difficulty: 1
+    text: "uptime"
+    description: "system uptime, users, and load averages"
+
+  # ── nohup / background ───────────────────────────────────────────
+  - id: lx-nohup
+    structure: process
+    language: linux
+    difficulty: 3
+    text: "nohup python worker.py > worker.log 2>&1 &"
+    description: "run worker detached from terminal, all output to log"
+  - id: lx-disown
+    structure: process
+    language: linux
+    difficulty: 2
+    text: "long-running-cmd & disown"
+    description: "background a process and detach from this shell"
+
+  # ═════════════════════════════════════════════════════════════════
+  # ── functioning-engineer toolkit:
+  #    file/codebase exploration, process/thread/memory, debug, basics
+  # ═════════════════════════════════════════════════════════════════
+
+  # ── codebase search/edit ─────────────────────────────────────────
+  - id: lx-rg-1
+    structure: ripgrep
+    language: linux
+    difficulty: 2
+    text: "rg -i 'error' --type py src/"
+    description: "ripgrep: case-insensitive 'error' in .py files"
+  - id: lx-rg-2
+    structure: ripgrep
+    language: linux
+    difficulty: 3
+    text: "rg -l 'TODO|FIXME' -g '!node_modules' -g '!.venv'"
+    description: "list files matching regex, excluding dependency dirs"
+  - id: lx-rg-context
+    structure: ripgrep
+    language: linux
+    difficulty: 3
+    text: "rg -C 3 'class Foo' --type py"
+    description: "show 3 lines of context around the match"
+  - id: lx-fd-1
+    structure: fast_find
+    language: linux
+    difficulty: 2
+    text: "fd -e py -E .venv -E node_modules"
+    description: "fd: find .py files, excluding common dep dirs"
+  - id: lx-fd-exec
+    structure: fast_find
+    language: linux
+    difficulty: 3
+    text: "fd -e py -x ruff check {}"
+    description: "run ruff check on every .py file found"
+  - id: lx-bat-1
+    structure: modern_view
+    language: linux
+    difficulty: 1
+    text: "bat README.md"
+    description: "syntax-highlighted cat"
+  - id: lx-tree
+    structure: modern_view
+    language: linux
+    difficulty: 2
+    text: "tree -L 2 -I 'node_modules|.venv|__pycache__'"
+    description: "directory tree, depth 2, excluding noise"
+
+  # ── file inspection ──────────────────────────────────────────────
+  - id: lx-file
+    structure: file_inspect
+    language: linux
+    difficulty: 1
+    text: "file binary"
+    description: "detect file type (ELF, script, image, etc.)"
+  - id: lx-stat
+    structure: file_inspect
+    language: linux
+    difficulty: 2
+    text: "stat -c '%n %s %y %a' file.txt"
+    description: "name / size / mtime / mode in one line"
+  - id: lx-readlink
+    structure: file_inspect
+    language: linux
+    difficulty: 2
+    text: "readlink -f /usr/bin/python3"
+    description: "resolve symlinks to absolute canonical path"
+  - id: lx-realpath
+    structure: file_inspect
+    language: linux
+    difficulty: 1
+    text: "realpath ./build/app"
+    description: "absolute canonical path (handles . .. symlinks)"
+  - id: lx-strings
+    structure: file_inspect
+    language: linux
+    difficulty: 3
+    text: "strings -n 8 binary | grep -i version"
+    description: "printable strings ≥8 chars; find version embedded in binary"
+  - id: lx-xxd
+    structure: file_inspect
+    language: linux
+    difficulty: 2
+    text: "xxd file.bin | head -20"
+    description: "hex+ASCII dump of first 20 lines"
+  - id: lx-od
+    structure: file_inspect
+    language: linux
+    difficulty: 3
+    text: "od -c file.txt | head"
+    description: "show hidden chars (good for finding stray \\r or \\0)"
+
+  # ── binary inspection (when debugging native) ────────────────────
+  - id: lx-ldd
+    structure: binary_inspect
+    language: linux
+    difficulty: 2
+    text: "ldd /usr/bin/python3"
+    description: "list shared libraries this binary needs"
+  # ── diff / patch / merge tools ───────────────────────────────────
+  - id: lx-diff-u
+    structure: diff
+    language: linux
+    difficulty: 2
+    text: "diff -u old.txt new.txt"
+    description: "unified diff (the standard patch format)"
+  - id: lx-diff-r
+    structure: diff
+    language: linux
+    difficulty: 2
+    text: "diff -ruN dir1/ dir2/"
+    description: "recursive diff between two trees"
+  - id: lx-patch
+    structure: diff
+    language: linux
+    difficulty: 3
+    text: "patch -p1 < changes.patch"
+    description: "apply a patch (strip 1 leading path component)"
+  - id: lx-comm
+    structure: diff
+    language: linux
+    difficulty: 3
+    text: "comm -12 sorted1.txt sorted2.txt"
+    description: "lines common to both sorted files (set intersection)"
+
+  # ── process / thread inspection ──────────────────────────────────
+  - id: lx-ps-tree
+    structure: process_inspect
+    language: linux
+    difficulty: 2
+    text: "ps -ef --forest"
+    description: "all processes as a parent/child tree"
+  - id: lx-ps-threads
+    structure: process_inspect
+    language: linux
+    difficulty: 3
+    text: "ps -eLf | grep python"
+    description: "list THREADS (-L) of every python process"
+  - id: lx-ps-cpu
+    structure: process_inspect
+    language: linux
+    difficulty: 3
+    text: "ps aux --sort=-%cpu | head"
+    description: "top 10 CPU-consuming processes"
+  - id: lx-top-h
+    structure: process_inspect
+    language: linux
+    difficulty: 3
+    text: "top -H -p $(pgrep -f myapp)"
+    description: "show per-thread CPU for myapp's process"
+  - id: lx-pidof
+    structure: process_inspect
+    language: linux
+    difficulty: 1
+    text: "pidof nginx"
+    description: "all PIDs of running nginx"
+  - id: lx-pgrep
+    structure: process_inspect
+    language: linux
+    difficulty: 2
+    text: "pgrep -af 'python.*worker'"
+    description: "match full cmdline; show pid + cmd"
+  - id: lx-htop
+    structure: process_inspect
+    language: linux
+    difficulty: 1
+    text: "htop"
+    description: "interactive process viewer"
+
+  # ── memory inspection ────────────────────────────────────────────
+  - id: lx-free-h
+    structure: memory_inspect
+    language: linux
+    difficulty: 1
+    text: "free -h"
+    description: "memory usage human-readable"
+  - id: lx-vmstat
+    structure: memory_inspect
+    language: linux
+    difficulty: 3
+    text: "vmstat 1 5"
+    description: "5 samples of vm + IO + CPU stats, 1 second apart"
+  - id: lx-pmap
+    structure: memory_inspect
+    language: linux
+    difficulty: 3
+    text: "pmap -x $(pidof api) | tail"
+    description: "memory map of api process (totals at the end)"
+  - id: lx-proc-status
+    structure: proc_fs
+    language: linux
+    difficulty: 3
+    text: "grep -E 'VmRSS|Threads' /proc/$PID/status"
+    description: "resident memory + thread count of a process"
+  - id: lx-proc-fd
+    structure: proc_fs
+    language: linux
+    difficulty: 3
+    text: "ls -la /proc/$PID/fd/ | head"
+    description: "open file descriptors of a process"
+  - id: lx-proc-limits
+    structure: proc_fs
+    language: linux
+    difficulty: 3
+    text: "cat /proc/$PID/limits"
+    description: "rlimits the process is running under"
+
+  # ── lsof / fuser / ulimit / nice ─────────────────────────────────
+  - id: lx-lsof-pid
+    structure: process_inspect
+    language: linux
+    difficulty: 3
+    text: "lsof -p $PID"
+    description: "every file/socket the process has open"
+  - id: lx-lsof-port
+    structure: process_inspect
+    language: linux
+    difficulty: 2
+    text: "lsof -nP -i tcp:8080"
+    description: "what's holding tcp:8080? (no DNS, numeric ports)"
+  - id: lx-fuser
+    structure: process_inspect
+    language: linux
+    difficulty: 3
+    text: "fuser -m /mnt/data"
+    description: "what processes have anything open under /mnt/data?"
+  - id: lx-ulimit
+    structure: shell_var
+    language: linux
+    difficulty: 2
+    text: "ulimit -a"
+    description: "all current resource limits for this shell"
+  - id: lx-nice
+    structure: process_inspect
+    language: linux
+    difficulty: 2
+    text: "nice -n 10 ./build.sh"
+    description: "run build with reduced priority"
+  - id: lx-taskset
+    structure: process_inspect
+    language: linux
+    difficulty: 3
+    text: "taskset -c 0,1 ./worker"
+    description: "pin the process to CPUs 0 and 1"
+
+  # ── debug / trace ────────────────────────────────────────────────
+  - id: lx-strace-attach
+    structure: debug_trace
+    language: linux
+    difficulty: 3
+    text: "strace -p $(pgrep -f myapp) -e openat,read"
+    description: "trace open + read syscalls of running myapp"
+  - id: lx-gdb-attach
+    structure: debug_trace
+    language: linux
+    difficulty: 3
+    text: "sudo gdb -p $(pidof api)"
+    description: "attach gdb to a running process"
+  - id: lx-py-spy-dump
+    structure: debug_trace
+    language: linux
+    difficulty: 3
+    text: "py-spy dump --pid $(pidof python)"
+    description: "thread stack of a running Python without stopping it"
+  - id: lx-perf-record
+    structure: debug_trace
+    language: linux
+    difficulty: 3
+    text: "perf record -g -F 99 -p $(pidof api) -- sleep 30"
+    description: "30-second sampling profile (input for flame-graph)"
+  - id: lx-dmesg
+    structure: debug_trace
+    language: linux
+    difficulty: 2
+    text: "dmesg -T | tail -50"
+    description: "kernel ring buffer with timestamps, last 50 lines"
+
+  # ── git advanced (real engineer territory) ───────────────────────
+  - id: lx-git-rebase-i
+    structure: git_advanced
+    language: linux
+    difficulty: 3
+    text: "git rebase -i origin/main"
+    description: "interactive rebase against origin/main (squash, reword, etc.)"
+  - id: lx-git-bisect
+    structure: git_advanced
+    language: linux
+    difficulty: 3
+    text: "git bisect start && git bisect bad HEAD && git bisect good v1.2.3"
+    description: "binary-search for the commit that broke things"
+  - id: lx-git-reflog
+    structure: git_advanced
+    language: linux
+    difficulty: 2
+    text: "git reflog --date=relative"
+    description: "history of HEAD movements (recover lost commits)"
+  - id: lx-git-stash
+    structure: git_advanced
+    language: linux
+    difficulty: 2
+    text: "git stash push -u -m 'wip: refactor'"
+    description: "stash incl. untracked files with a message"
+  - id: lx-git-cherry
+    structure: git_advanced
+    language: linux
+    difficulty: 3
+    text: "git cherry-pick -x abc123..def456"
+    description: "apply a range of commits, recording origin in message"
+  - id: lx-git-blame-w
+    structure: git_advanced
+    language: linux
+    difficulty: 3
+    text: "git blame -w -C -L 10,20 src/main.py"
+    description: "blame lines 10-20, ignoring whitespace + tracking moves"
+  - id: lx-git-grep
+    structure: git_advanced
+    language: linux
+    difficulty: 2
+    text: "git grep -n 'TODO' $(git rev-parse HEAD)"
+    description: "grep tracked files at a specific commit"
+
+  # ── tmux (sessions) ──────────────────────────────────────────────
+  - id: lx-tmux-new
+    structure: tmux
+    language: linux
+    difficulty: 2
+    text: "tmux new -s work -d 'cd ~/proj && nvim .'"
+    description: "create detached tmux session 'work' running an editor"
+  - id: lx-tmux-attach
+    structure: tmux
+    language: linux
+    difficulty: 2
+    text: "tmux a -t work"
+    description: "attach to session 'work'"
+  - id: lx-tmux-send
+    structure: tmux
+    language: linux
+    difficulty: 3
+    text: "tmux send-keys -t work:0 'pytest -x' Enter"
+    description: "send keystrokes into a tmux pane — script your shell"
+
+  # ── fzf (interactive piping) ─────────────────────────────────────
+  - id: lx-fzf-cd
+    structure: fzf
+    language: linux
+    difficulty: 3
+    text: "cd $(find . -type d | fzf)"
+    description: "fuzzy-pick a directory and cd into it"
+  - id: lx-fzf-kill
+    structure: fzf
+    language: linux
+    difficulty: 3
+    text: "ps aux | fzf --multi | awk '{print $2}' | xargs kill -9"
+    description: "fuzzy multi-select processes and kill them"
+
+  # ── file watcher (TDD loop) ──────────────────────────────────────
+  - id: lx-entr
+    structure: file_watcher
+    language: linux
+    difficulty: 3
+    text: "ls *.py | entr -c pytest -x"
+    description: "re-run pytest on .py changes (clear screen each time)"
+  - id: lx-watchexec
+    structure: file_watcher
+    language: linux
+    difficulty: 3
+    text: "watchexec -e py -- pytest --lf"
+    description: "modern entr — re-run last-failed tests on .py change"
+
+  # ── jq advanced (data wrangling) ─────────────────────────────────
+  - id: lx-jq-update
+    structure: jq
+    language: linux
+    difficulty: 3
+    text: "jq '.users |= map(. + {role: \"admin\"})' users.json"
+    description: "add role:admin to every user object"
+  - id: lx-yq
+    structure: jq
+    language: linux
+    difficulty: 3
+    text: "yq '.spec.replicas = 5' -i deployment.yaml"
+    description: "in-place edit YAML to set replicas: 5"
+
+  # ── network debug ────────────────────────────────────────────────
+  - id: lx-curl-time
+    structure: curl_get
+    language: linux
+    difficulty: 3
+    text: "curl -w '@curl-format.txt' -o /dev/null -s https://api.example.com/"
+    description: "time TLS / connect / TTFB / total via custom format file"
+  - id: lx-dig-trace
+    structure: dns
+    language: linux
+    difficulty: 3
+    text: "dig +trace +nocomments example.com"
+    description: "follow DNS resolution from root servers down"
+  - id: lx-tcpdump
+    structure: dns
+    language: linux
+    difficulty: 3
+    text: "sudo tcpdump -i any -nn 'port 5432' -c 20"
+    description: "capture 20 packets on port 5432 (postgres) for inspection"
+
+  # ── env / which / man ────────────────────────────────────────────
+  - id: lx-env-grep
+    structure: shell_var
+    language: linux
+    difficulty: 1
+    text: "env | grep PATH"
+    description: "show PATH and any *PATH* variables"
+  - id: lx-which-type
+    structure: shell_var
+    language: linux
+    difficulty: 1
+    text: "type python3"
+    description: "shows alias/function/builtin/path resolution"
+  - id: lx-man-k
+    structure: shell_var
+    language: linux
+    difficulty: 1
+    text: "man -k 'process'"
+    description: "search man pages by keyword (apropos)"
+
+  # ── editor invocation ────────────────────────────────────────────
+  - id: lx-vim-line
+    structure: editor
+    language: linux
+    difficulty: 2
+    text: "vim +123 src/main.py"
+    description: "open file at line 123"
+  - id: lx-vim-search
+    structure: editor
+    language: linux
+    difficulty: 3
+    text: "vim +/TODO src/main.py"
+    description: "open file and jump to first TODO"
+  - id: lx-nvim-noplug
+    structure: editor
+    language: linux
+    difficulty: 3
+    text: "nvim --noplugin -u NONE file.py"
+    description: "vanilla neovim — useful for diagnosing plugin issues"
+
+  # ═════════════════════════════════════════════════════════════════
+  # ── basic file ops (cp / mv / rm / mkdir / touch / ln)
+  # ═════════════════════════════════════════════════════════════════
+  - id: lx-cp
+    structure: file_op
+    language: linux
+    difficulty: 2
+    text: "cp -av src/ dst/"
+    description: "copy preserving perms/timestamps, verbose"
+  - id: lx-mv
+    structure: file_op
+    language: linux
+    difficulty: 1
+    text: "mv old.txt new.txt"
+    description: "rename / move"
+  - id: lx-rm
+    structure: file_op
+    language: linux
+    difficulty: 2
+    text: "rm -rf build/ dist/"
+    description: "recursively force-delete dirs"
+  - id: lx-mkdir
+    structure: file_op
+    language: linux
+    difficulty: 2
+    text: "mkdir -p path/to/deep/dir"
+    description: "create dir + all missing parents"
+  - id: lx-touch
+    structure: file_op
+    language: linux
+    difficulty: 1
+    text: "touch .keep"
+    description: "create empty file (or update mtime)"
+  - id: lx-ln-sf
+    structure: file_op
+    language: linux
+    difficulty: 2
+    text: "ln -sf $(pwd)/build /srv/app"
+    description: "symlink (force-overwrite if target exists)"
+
+  # ═════════════════════════════════════════════════════════════════
+  # ── paging / viewing (less / tail / head / cat)
+  # ═════════════════════════════════════════════════════════════════
+  - id: lx-less-f
+    structure: paging
+    language: linux
+    difficulty: 2
+    text: "less +F /var/log/syslog"
+    description: "follow log; Ctrl-C to navigate, F to resume follow"
+  - id: lx-tail-f
+    structure: paging
+    language: linux
+    difficulty: 2
+    text: "tail -f -n 100 app.log"
+    description: "show last 100 lines, follow new appends"
+  - id: lx-head
+    structure: paging
+    language: linux
+    difficulty: 1
+    text: "head -20 data.csv"
+    description: "first 20 lines"
+  - id: lx-cat-n
+    structure: paging
+    language: linux
+    difficulty: 1
+    text: "cat -n script.py"
+    description: "cat with line numbers"
+
+  # ═════════════════════════════════════════════════════════════════
+  # ── text-pipeline primitives (wc / sort / uniq / cut / tr)
+  # ═════════════════════════════════════════════════════════════════
+  - id: lx-wc-l
+    structure: text_pipeline
+    language: linux
+    difficulty: 1
+    text: "wc -l *.py"
+    description: "line count per .py file + total"
+  - id: lx-sort-k-n
+    structure: text_pipeline
+    language: linux
+    difficulty: 3
+    text: "sort -k2 -t, -n data.csv | head"
+    description: "sort CSV by 2nd field numerically"
+  - id: lx-uniq-c
+    structure: text_pipeline
+    language: linux
+    difficulty: 2
+    text: "sort access.log | uniq -c | sort -rn | head"
+    description: "top frequent lines (e.g. URLs in access log)"
+  - id: lx-cut
+    structure: text_pipeline
+    language: linux
+    difficulty: 2
+    text: "cut -d: -f1,7 /etc/passwd"
+    description: "username + login shell"
+  - id: lx-tr
+    structure: text_pipeline
+    language: linux
+    difficulty: 2
+    text: "tr -d '\\r' < windows.txt > unix.txt"
+    description: "strip Windows CR characters"
+
+  # ═════════════════════════════════════════════════════════════════
+  # ── conditionals & tests
+  # ═════════════════════════════════════════════════════════════════
+  - id: lx-test-file
+    structure: conditional
+    language: linux
+    difficulty: 2
+    text: "[[ -f config.toml ]] && echo found"
+    description: "guarded action: only if file exists"
+  - id: lx-if-grep-q
+    structure: conditional
+    language: linux
+    difficulty: 3
+    text: "if grep -q TODO src/*.py; then echo dirty; fi"
+    description: "branch on whether grep found anything"
+  - id: lx-command-v
+    structure: conditional
+    language: linux
+    difficulty: 3
+    text: "command -v rg >/dev/null || sudo apt install -y ripgrep"
+    description: "install rg if missing — POSIX-portable check"
+
+  # ═════════════════════════════════════════════════════════════════
+  # ── shell parameter expansion
+  # ═════════════════════════════════════════════════════════════════
+  - id: lx-param-strip
+    structure: string_param
+    language: linux
+    difficulty: 3
+    text: "echo \"${file%.txt}.md\""
+    description: "strip .txt suffix, append .md"
+  - id: lx-param-default
+    structure: string_param
+    language: linux
+    difficulty: 2
+    text: "echo \"${PORT:-8080}\""
+    description: "use 8080 if PORT is unset/empty"
+  - id: lx-basename
+    structure: string_param
+    language: linux
+    difficulty: 1
+    text: "basename /var/log/syslog"
+    description: "filename portion of a path"
+
+  # ═════════════════════════════════════════════════════════════════
+  # ── user / group / sudo
+  # ═════════════════════════════════════════════════════════════════
+  - id: lx-id
+    structure: user_group
+    language: linux
+    difficulty: 1
+    text: "id -nG"
+    description: "all groups the current user belongs to"
+  - id: lx-sudo-u
+    structure: user_group
+    language: linux
+    difficulty: 2
+    text: "sudo -u postgres psql -c 'SELECT version();'"
+    description: "run as another user (no full shell)"
+
+  # ═════════════════════════════════════════════════════════════════
+  # ── shell history
+  # ═════════════════════════════════════════════════════════════════
+  - id: lx-history-bang
+    structure: history
+    language: linux
+    difficulty: 1
+    text: "sudo !!"
+    description: "rerun previous command with sudo"
+  - id: lx-history-arg
+    structure: history
+    language: linux
+    difficulty: 2
+    text: "ls -la !$"
+    description: "reuse last argument of previous command"
+
+  # ═════════════════════════════════════════════════════════════════
+  # ── date / seq / mktemp / man / tldr
+  # ═════════════════════════════════════════════════════════════════
+  - id: lx-date-iso
+    structure: date_seq
+    language: linux
+    difficulty: 2
+    text: "date -u +%FT%TZ"
+    description: "ISO 8601 UTC timestamp"
+  - id: lx-seq-w
+    structure: date_seq
+    language: linux
+    difficulty: 2
+    text: "seq -w 1 100"
+    description: "01..100 zero-padded (good for batch IDs)"
+  - id: lx-mktemp-trap
+    structure: date_seq
+    language: linux
+    difficulty: 3
+    text: "tmp=$(mktemp -d); trap 'rm -rf \"$tmp\"' EXIT"
+    description: "safe scratch dir, auto-cleaned on script exit"
+  - id: lx-man-section
+    structure: date_seq
+    language: linux
+    difficulty: 1
+    text: "man 7 signal"
+    description: "signal man page (section 7 = misc/overview)"
+  - id: lx-tldr
+    structure: date_seq
+    language: linux
+    difficulty: 1
+    text: "tldr rsync"
+    description: "community-curated quick reference"

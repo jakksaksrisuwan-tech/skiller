@@ -6,7 +6,7 @@ When a previously locked achievement evaluates True, it's unlocked + toasted.
 from __future__ import annotations
 
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Callable
 
 from .store import Store
@@ -81,13 +81,64 @@ def _has_task_completion(store: Store) -> bool:
     return any(a.kind == "task" and a.correct for a in store.attempts)
 
 
-# All snippet structure ids in the seed yaml. Used by 'polyglot'.
-_KNOWN_STRUCTURES = {
+# Snippet structures grouped by language. Used by polyglot/mastery rules.
+_PYTHON_STRUCTURES = {
     "list_comp", "dict_comp", "set_comp", "gen_expr", "lambda",
     "with_as", "try_except", "def_signature", "decorator", "fstring",
     "import_stmt", "class_def", "slicing", "regex", "async_await",
     "walrus", "match_stmt", "ternary",
+    # added in the expansion
+    "unpack", "dict_method", "str_method", "type_hint", "pathlib",
 }
+_LINUX_STRUCTURES = {
+    # core
+    "ls_dir", "find_basic", "find_filter", "find_exec",
+    "grep_basic", "grep_recursive", "grep_regex",
+    "awk_field", "sed_inplace",
+    "chmod_octal", "chown_user",
+    "tar_extract", "tar_create",
+    "ps_grep", "kill_pid", "ss_tcp",
+    "ssh_remote", "scp_copy", "curl_get", "curl_head",
+    "pipe_filter", "pipe_chain", "redirect",
+    "systemd_status", "journalctl",
+    "git_log", "git_branch", "git_diff",
+    "shell_loop", "shell_var",
+    "docker_ps",
+    # devskiller-aligned additions
+    "apt", "shell_subst", "jq", "xargs", "rsync", "cron",
+    "disk", "process", "monitoring",
+    # functioning-engineer toolkit
+    "ripgrep", "fast_find", "modern_view",
+    "file_inspect", "binary_inspect", "diff",
+    "process_inspect", "memory_inspect", "proc_fs",
+    "debug_trace", "editor",
+    "git_advanced", "tmux", "fzf",
+    "file_watcher", "dns",
+    # daily-engineer essentials
+    "file_op", "paging", "text_pipeline",
+    "conditional", "string_param", "user_group",
+    "history", "date_seq",
+}
+# Backwards-compat alias used elsewhere (now equivalent to Python set)
+_KNOWN_STRUCTURES = _PYTHON_STRUCTURES
+
+
+# Mastery thresholds. Used in `_mastered_in` and surfaced in achievement
+# descriptions ("Master 3 structures (≥50 wpm, ≥85% acc, ≥5 runs)").
+MASTERY_MIN_RUNS = 5
+MASTERY_MIN_WPM = 50.0
+MASTERY_MIN_ACCURACY = 0.85
+
+
+def _mastered_in(store: Store, structures: set[str]) -> int:
+    """Count of given structures mastered against the thresholds above."""
+    return sum(
+        1 for k in structures
+        if (st := store.structures.get(k)) is not None
+        and st.completions >= MASTERY_MIN_RUNS
+        and st.wpm >= MASTERY_MIN_WPM
+        and st.accuracy >= MASTERY_MIN_ACCURACY
+    )
 
 
 ACHIEVEMENTS: list[Achievement] = [
@@ -162,32 +213,69 @@ ACHIEVEMENTS: list[Achievement] = [
         lambda s, c: s.typing_streak_days() >= 30,
         lambda s, c: (s.typing_streak_days(), 30)),
 
-    # ── coverage ────────────────────────────────────────────────────
-    Achievement("polyglot", "Polly Want a Cracker", "Drill every structure once — pythonista parrot",
+    # ── coverage (Python) ───────────────────────────────────────────
+    Achievement("polyglot", "Polly Want a Cracker", "Drill every Python structure once — pythonista parrot",
         "silver",
-        lambda s, c: _KNOWN_STRUCTURES.issubset(set(s.structures.keys())),
+        lambda s, c: _PYTHON_STRUCTURES.issubset(set(s.structures.keys())),
         lambda s, c: (
-            len(_KNOWN_STRUCTURES & set(s.structures.keys())),
-            len(_KNOWN_STRUCTURES),
+            len(_PYTHON_STRUCTURES & set(s.structures.keys())),
+            len(_PYTHON_STRUCTURES),
         )),
 
-    # ── mastery ─────────────────────────────────────────────────────
-    Achievement("master_3", "Trifecta Pythonica", "Master 3 structures (≥50 wpm, ≥85% acc, ≥5 runs)",
-        "silver",
-        lambda s, c: sum(
-            1 for st in s.structures.values()
-            if st.completions >= 5 and st.wpm >= 50 and st.accuracy >= 0.85
-        ) >= 3,
+    # ── coverage (Linux) ────────────────────────────────────────────
+    Achievement("linux_polyglot", "Shell Game",
+        "Drill every Linux structure once — pipe to victory", "silver",
+        lambda s, c: _LINUX_STRUCTURES.issubset(set(s.structures.keys())),
         lambda s, c: (
-            sum(1 for st in s.structures.values()
-                if st.completions >= 5 and st.wpm >= 50 and st.accuracy >= 0.85),
-            3,
+            len(_LINUX_STRUCTURES & set(s.structures.keys())),
+            len(_LINUX_STRUCTURES),
         )),
+
+    # ── mastery (Python) ────────────────────────────────────────────
+    Achievement("master_3", "Trifecta Pythonica",
+        "Master 3 Python structures (≥50 wpm, ≥85% acc, ≥5 runs)", "silver",
+        lambda s, c: _mastered_in(s, _PYTHON_STRUCTURES) >= 3,
+        lambda s, c: (_mastered_in(s, _PYTHON_STRUCTURES), 3)),
+
+    # ── mastery (Linux) ─────────────────────────────────────────────
+    Achievement("linux_master_3", "Three Pipe Problem",
+        "Master 3 Linux structures (≥50 wpm, ≥85% acc, ≥5 runs)", "silver",
+        lambda s, c: _mastered_in(s, _LINUX_STRUCTURES) >= 3,
+        lambda s, c: (_mastered_in(s, _LINUX_STRUCTURES), 3)),
     # ── grit (beginner-friendly) ────────────────────────────────────
     Achievement("brave_soul", "Brave Soul",
         "Finish a snippet with ≥5 errors — didn't give up", "bronze",
         lambda s, c: c.get("brave_soul_session", False),
         None),
+
+    # ── correction mode (F4 bigram drill) ───────────────────────────
+    Achievement("self_aware", "Self-Aware",
+        "Enter correction mode for the first time — knowing the gap is half the fix",
+        "bronze",
+        lambda s, c: s.correction_mode_enters >= 1,
+        lambda s, c: (s.correction_mode_enters, 1)),
+    Achievement("drill_sergeant", "Drill Sergeant",
+        "10 correction-mode drills completed", "bronze",
+        lambda s, c: s.total_drill_completions >= 10,
+        lambda s, c: (s.total_drill_completions, 10)),
+    Achievement("reps_reps_reps", "Reps Reps Reps",
+        "50 correction-mode drills completed", "silver",
+        lambda s, c: s.total_drill_completions >= 50,
+        lambda s, c: (s.total_drill_completions, 50)),
+    Achievement("pass_the_bar", "Pass the Bar",
+        "Graduate your first struggle bigram below the speed threshold", "silver",
+        lambda s, c: s.total_graduations >= 1,
+        lambda s, c: (s.total_graduations, 1)),
+    Achievement("clean_slate", "Clean Slate",
+        "Clear every struggle bigram in one correction session — tabula rasa",
+        "gold",
+        lambda s, c: s.total_pool_clears >= 1 or c.get("pool_just_cleared", False),
+        lambda s, c: (s.total_pool_clears, 1)),
+    Achievement("zen_master", "Zen Master",
+        "Clear the struggle pool 3 times — sustained mindful practice",
+        "platinum",
+        lambda s, c: s.total_pool_clears >= 3,
+        lambda s, c: (s.total_pool_clears, 3)),
 
     # ── self-correction (clearing red marks) ────────────────────────
     Achievement("patch_notes", "Patch Notes",
@@ -267,24 +355,17 @@ ACHIEVEMENTS: list[Achievement] = [
             3,
         )),
 
-    Achievement("master_all", "Snake Charmer", "Master every structure — `from enlightenment import *`",
+    Achievement("master_all", "Snake Charmer",
+        "Master every Python structure — `from enlightenment import *`",
         "platinum",
-        lambda s, c: (
-            _KNOWN_STRUCTURES.issubset(set(s.structures.keys()))
-            and all(
-                st.completions >= 5 and st.wpm >= 50 and st.accuracy >= 0.85
-                for k, st in s.structures.items()
-                if k in _KNOWN_STRUCTURES
-            )
-        ),
-        lambda s, c: (
-            sum(
-                1 for k in _KNOWN_STRUCTURES
-                if (st := s.structures.get(k)) is not None
-                and st.completions >= 5 and st.wpm >= 50 and st.accuracy >= 0.85
-            ),
-            len(_KNOWN_STRUCTURES),
-        )),
+        lambda s, c: _mastered_in(s, _PYTHON_STRUCTURES) == len(_PYTHON_STRUCTURES),
+        lambda s, c: (_mastered_in(s, _PYTHON_STRUCTURES), len(_PYTHON_STRUCTURES))),
+
+    Achievement("linux_master_all", "Root of It All",
+        "Master every Linux structure — `sudo make me a sandwich`",
+        "platinum",
+        lambda s, c: _mastered_in(s, _LINUX_STRUCTURES) == len(_LINUX_STRUCTURES),
+        lambda s, c: (_mastered_in(s, _LINUX_STRUCTURES), len(_LINUX_STRUCTURES))),
 ]
 
 

@@ -58,12 +58,18 @@ def all_item_tags() -> dict[str, list[str]]:
     return tags
 
 
-def load_snippets() -> list[TypingSnippet]:
-    path = CONTENT_DIR / "typing_snippets.yaml"
-    if not path.exists():
-        return []
-    data = yaml.safe_load(path.read_text()) or {}
-    return [TypingSnippet(**s) for s in data.get("snippets", [])]
+def load_snippets(language: str | None = None) -> list[TypingSnippet]:
+    """Load typing snippets, optionally filtered by language.
+    Reads any file matching `typing_*.yaml` in the content dir so adding a new
+    pool (e.g. typing_linux.yaml) requires no loader changes."""
+    out: list[TypingSnippet] = []
+    for path in sorted(CONTENT_DIR.glob("typing_*.yaml")):
+        data = yaml.safe_load(path.read_text()) or {}
+        for s in data.get("snippets", []):
+            snip = TypingSnippet(**s)
+            if language is None or snip.language == language:
+                out.append(snip)
+    return out
 
 
 def structure_weakness(stat) -> float:
@@ -77,21 +83,32 @@ def structure_weakness(stat) -> float:
 
 
 def pick_snippet(
-    snippets: list[TypingSnippet], store: Store, stretch_chance: float = 0.15
+    snippets: list[TypingSnippet],
+    store: Store,
+    *,
+    stretch_chance: float = 0.15,
+    focus_bigrams: list[str] | None = None,
 ) -> TypingSnippet | None:
     """Adaptive picker. Filters to user's tier; with `stretch_chance` reaches
-    one tier above to sprinkle a harder sample. Within the eligible pool,
-    structure-weakness weighting picks which item."""
+    one tier above. Structure-weakness weighting picks within the eligible pool.
+
+    If `focus_bigrams` is given (correction mode), snippets containing those
+    sequences get a multiplicative weight boost (1 + 0.5 per occurrence)."""
     if not snippets:
         return None
     user_tier = store.typing_user_tier()
     cap = user_tier + (1 if random.random() < stretch_chance else 0)
-    eligible = [s for s in snippets if getattr(s, "difficulty", 2) <= cap]
+    eligible = [s for s in snippets if s.difficulty <= cap]
     if not eligible:
-        eligible = snippets  # fall back if nothing tagged at this tier
+        eligible = snippets
     weights = [
         structure_weakness(store.structures.get(s.structure)) for s in eligible
     ]
+    if focus_bigrams:
+        for i, s in enumerate(eligible):
+            hits = sum(1 for bg in focus_bigrams if bg and bg in s.text)
+            if hits:
+                weights[i] = weights[i] * (1.0 + 0.5 * hits)
     return random.choices(eligible, weights=weights, k=1)[0]
 
 

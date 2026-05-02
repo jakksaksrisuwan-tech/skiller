@@ -255,3 +255,279 @@ snippets:
     difficulty: 2
     text: "x = a if a is not None else b"
     tags: [syntax]
+  - id: ts-ternary-3
+    structure: ternary
+    difficulty: 2
+    text: "result = data or fallback"
+    tags: [syntax]
+
+  # ── assignment / unpacking ───────────────────────────────────────
+  - id: ts-unpack-1
+    structure: unpack
+    difficulty: 1
+    text: "a, b = b, a"
+    tags: [syntax]
+  - id: ts-unpack-2
+    structure: unpack
+    difficulty: 2
+    text: "first, *rest = items"
+    tags: [syntax]
+  - id: ts-unpack-3
+    structure: unpack
+    difficulty: 2
+    text: "(name, age), *_ = pairs"
+    tags: [syntax]
+  - id: ts-unpack-4
+    structure: unpack
+    difficulty: 3
+    text: "{'a': a, 'b': b, **rest} = data"
+    tags: [syntax, dict]
+
+  # ── dict methods ─────────────────────────────────────────────────
+  - id: ts-dictmeth-1
+    structure: dict_method
+    difficulty: 1
+    text: "d.get(key, default)"
+    tags: [dict]
+  - id: ts-dictmeth-2
+    structure: dict_method
+    difficulty: 2
+    text: "d.setdefault('key', []).append(value)"
+    tags: [dict]
+  - id: ts-dictmeth-3
+    structure: dict_method
+    difficulty: 2
+    text: "for k, v in sorted(d.items()):"
+    tags: [dict, sorting]
+  - id: ts-dictmeth-4
+    structure: dict_method
+    difficulty: 2
+    text: "merged = {**a, **b}"
+    tags: [dict]
+  - id: ts-dictmeth-5
+    structure: dict_method
+    difficulty: 1
+    text: "d | {'key': 'value'}"
+    tags: [dict]
+
+  # ── string methods ───────────────────────────────────────────────
+  - id: ts-strmeth-1
+    structure: str_method
+    difficulty: 1
+    text: "s.strip().lower()"
+    tags: [strings]
+  - id: ts-strmeth-2
+    structure: str_method
+    difficulty: 2
+    text: "','.join(str(x) for x in nums)"
+    tags: [strings]
+  - id: ts-strmeth-3
+    structure: str_method
+    difficulty: 2
+    text: "line.split(',', maxsplit=2)"
+    tags: [strings]
+  - id: ts-strmeth-4
+    structure: str_method
+    difficulty: 2
+    text: "text.replace('\\n', ' ').strip()"
+    tags: [strings]
+  - id: ts-strmeth-5
+    structure: str_method
+    difficulty: 3
+    text: "name.removeprefix('prefix_').removesuffix('.txt')"
+    tags: [strings]
+
+  # ── type hints ───────────────────────────────────────────────────
+  - id: ts-typing-1
+    structure: type_hint
+    difficulty: 2
+    text: "x: int | None = None"
+    tags: [typing]
+  - id: ts-typing-2
+    structure: type_hint
+    difficulty: 3
+    text: "callback: Callable[[int, str], bool] = ..."
+    tags: [typing]
+  - id: ts-typing-3
+    structure: type_hint
+    difficulty: 3
+    text: "items: dict[str, list[tuple[int, str]]] = {}"
+    tags: [typing]
+  - id: ts-typing-4
+    structure: type_hint
+    difficulty: 2
+    text: "from typing import TYPE_CHECKING"
+    tags: [typing, imports]
+
+  # ── pathlib / io ─────────────────────────────────────────────────
+  - id: ts-pathlib-1
+    structure: pathlib
+    difficulty: 1
+    text: "Path('data.json').read_text()"
+    tags: [pathlib, io]
+  - id: ts-pathlib-2
+    structure: pathlib
+    difficulty: 2
+    text: "Path(__file__).parent / 'config.toml'"
+    tags: [pathlib]
+  - id: ts-pathlib-3
+    structure: pathlib
+    difficulty: 2
+    text: "for p in Path('.').rglob('*.py'):"
+    tags: [pathlib]
+  - id: ts-pathlib-4
+    structure: pathlib
+    difficulty: 3
+    text: "Path('out.json').write_text(json.dumps(d, indent=2))"
+    tags: [pathlib, json]
+
+  # ── more list/dict comp ──────────────────────────────────────────
+  - id: ts-listcomp-5
+    structure: list_comp
+    difficulty: 3
+    text: "[c for line in lines for c in line if c.isalpha()]"
+    tags: [comprehensions, nested]
+  - id: ts-listcomp-6
+    structure: list_comp
+    difficulty: 2
+    text: "[s.upper() for s in strs if s]"
+    tags: [comprehensions, strings]
+  - id: ts-dictcomp-4
+    structure: dict_comp
+    difficulty: 2
+    text: "{i: x for i, x in enumerate(items)}"
+    tags: [comprehensions, dict]
+  - id: ts-dictcomp-5
+    structure: dict_comp
+    difficulty: 3
+    text: "{k: sum(v) for k, v in groups.items()}"
+    tags: [comprehensions, dict]
+
+  # ── more lambda ──────────────────────────────────────────────────
+  - id: ts-lambda-4
+    structure: lambda
+    difficulty: 2
+    text: "reduce(lambda a, b: a + b, nums, 0)"
+    tags: [lambda, functools]
+  - id: ts-lambda-5
+    structure: lambda
+    difficulty: 3
+    text: "list(map(lambda x: x.strip().lower(), lines))"
+    tags: [lambda]
+
+  # ── more decorators ──────────────────────────────────────────────
+  - id: ts-deco-4
+    structure: decorator
+    difficulty: 2
+    text: "@staticmethod"
+    tags: [decorators, classes]
+  - id: ts-deco-5
+    structure: decorator
+    difficulty: 2
+    text: "@classmethod"
+    tags: [decorators, classes]
+  - id: ts-deco-6
+    structure: decorator
+    difficulty: 3
+    text: "@functools.wraps(fn)"
+    tags: [decorators, functools]
+
+  # ── more f-string ────────────────────────────────────────────────
+  - id: ts-fstr-4
+    structure: fstring
+    difficulty: 2
+    text: "f'{count} item{\"s\" if count != 1 else \"\"}'"
+    tags: [fstring]
+  - id: ts-fstr-5
+    structure: fstring
+    difficulty: 1
+    text: "f'{x:,}'"
+    tags: [fstring, formatting]
+
+  # ── more imports ─────────────────────────────────────────────────
+  - id: ts-import-4
+    structure: import_stmt
+    difficulty: 2
+    text: "from dataclasses import dataclass, field"
+    tags: [imports]
+  - id: ts-import-5
+    structure: import_stmt
+    difficulty: 2
+    text: "from itertools import chain, groupby, islice"
+    tags: [imports, itertools]
+
+  # ── more def signatures ──────────────────────────────────────────
+  - id: ts-def-4
+    structure: def_signature
+    difficulty: 2
+    text: "def fn(*args: int, **kwargs: str) -> None:"
+    tags: [typing]
+  - id: ts-def-5
+    structure: def_signature
+    difficulty: 3
+    text: "def __repr__(self) -> str:"
+    tags: [classes]
+
+  # ── more try/except ──────────────────────────────────────────────
+  - id: ts-tryex-3
+    structure: try_except
+    difficulty: 2
+    text: "except Exception as e:"
+    tags: [exceptions]
+  - id: ts-tryex-4
+    structure: try_except
+    difficulty: 3
+    text: "raise NotImplementedError('subclass must override')"
+    tags: [exceptions]
+
+  # ── more class_def ───────────────────────────────────────────────
+  - id: ts-class-3
+    structure: class_def
+    difficulty: 2
+    text: "class Foo(Protocol):"
+    tags: [classes, typing]
+  - id: ts-class-4
+    structure: class_def
+    difficulty: 3
+    text: "class Bar(Generic[T]):"
+    tags: [classes, typing]
+
+  # ── more slicing ─────────────────────────────────────────────────
+  - id: ts-slice-4
+    structure: slicing
+    difficulty: 2
+    text: "rows = data[1:-1]"
+    tags: [slicing]
+
+  # ── more match ───────────────────────────────────────────────────
+  - id: ts-match-3
+    structure: match_stmt
+    difficulty: 3
+    text: "case {'type': 'user', 'name': str(name)}:"
+    tags: [match, syntax]
+
+  # ── more set/gen ─────────────────────────────────────────────────
+  - id: ts-setcomp-2
+    structure: set_comp
+    difficulty: 2
+    text: "{w.lower() for w in words}"
+    tags: [comprehensions, set]
+  - id: ts-genexpr-3
+    structure: gen_expr
+    difficulty: 3
+    text: "max((s.score for s in students), default=0)"
+    tags: [generators]
+
+  # ── more walrus ──────────────────────────────────────────────────
+  - id: ts-walrus-2
+    structure: walrus
+    difficulty: 3
+    text: "if (n := len(data)) > threshold:"
+    tags: [syntax]
+
+  # ── more async ───────────────────────────────────────────────────
+  - id: ts-async-4
+    structure: async_await
+    difficulty: 3
+    text: "async for chunk in response.content.iter_chunked(8192):"
+    tags: [asyncio]

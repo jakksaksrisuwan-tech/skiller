@@ -144,3 +144,240 @@ questions:
     answer: 0
     explain: "`-i` edits in place. `g` flag = all matches per line."
     tags: [sed, text]
+
+  # ── pipes / redirects ────────────────────────────────────────────
+  - id: lin-redirect-stderr
+    skill: linux
+    prompt: "Redirect both stdout and stderr of `cmd` to output.log."
+    choices:
+      - "cmd > output.log 2>&1"
+      - "cmd > output.log 1>&2"
+      - "cmd 2> output.log"
+      - "cmd >> output.log"
+    answer: 0
+    explain: "`2>&1` duplicates fd2 onto fd1's destination. `&>` is a bash shortcut."
+    tags: [redirect, shell]
+
+  - id: lin-heredoc
+    skill: linux
+    prompt: "Which is a here-document (multi-line input to a command)?"
+    choices:
+      - "cat <<EOF\\nhello\\nworld\\nEOF"
+      - "cat < EOF"
+      - "cat <<<EOF"
+      - "cat -- EOF"
+    answer: 0
+    explain: "`<<DELIM` reads until DELIM on its own line. `<<<` is here-string (single line)."
+    tags: [shell, heredoc]
+
+  - id: lin-tee-pipe
+    skill: linux
+    prompt: "Append `cmd`'s output to log AND show on terminal."
+    choices:
+      - "cmd | tee -a log"
+      - "cmd > log"
+      - "cmd >> log"
+      - "cmd | log"
+    answer: 0
+    explain: "`tee` writes to file AND stdout. `-a` appends instead of overwriting."
+    tags: [pipe, tee]
+
+  # ── grep advanced ────────────────────────────────────────────────
+  - id: lin-grep-context
+    skill: linux
+    prompt: "Show 3 lines of context AFTER each 'ERROR' match."
+    choices:
+      - "grep -A 3 ERROR app.log"
+      - "grep -B 3 ERROR app.log"
+      - "grep -n ERROR app.log | head -3"
+      - "grep -e ERROR -3 app.log"
+    answer: 0
+    explain: "`-A N` after, `-B N` before, `-C N` both. Useful for debugging logs."
+    tags: [grep]
+
+  - id: lin-grep-invert
+    skill: linux
+    prompt: "Show all lines NOT containing '#' (skip comments)."
+    choices:
+      - "grep -v '#' config.ini"
+      - "grep '!#' config.ini"
+      - "grep -x '#' config.ini"
+      - "grep --not '#' config.ini"
+    answer: 0
+    explain: "`-v` inverts the match. Common idiom for filtering out comments."
+    tags: [grep]
+
+  # ── find advanced ────────────────────────────────────────────────
+  - id: lin-find-perm
+    skill: linux
+    prompt: "Find files under /etc readable by everyone (other-read bit set)."
+    choices:
+      - "find /etc -perm -o=r"
+      - "find /etc -perm 444"
+      - "find /etc -readable -type f"
+      - "find /etc -type f -access r"
+    answer: 0
+    explain: "`-perm -o=r` matches files where the o(ther) read bit is set (regardless of other bits)."
+    tags: [find, permissions]
+
+  - id: lin-find-newer
+    skill: linux
+    prompt: "Find files modified more recently than reference.txt."
+    choices:
+      - "find . -newer reference.txt"
+      - "find . -mtime -reference.txt"
+      - "find . -younger reference.txt"
+      - "find . -recent reference.txt"
+    answer: 0
+    explain: "`-newer FILE` compares mtime against the reference file."
+    tags: [find]
+
+  # ── awk patterns ─────────────────────────────────────────────────
+  - id: lin-awk-sum
+    skill: linux
+    prompt: "Sum the 3rd column of `data.csv` (comma-separated, no header)."
+    choices:
+      - "awk -F, '{s+=$3} END {print s}' data.csv"
+      - "awk -F, '$3' data.csv"
+      - "awk '{print $3}' data.csv | sum"
+      - "awk -d, '+= $3' data.csv"
+    answer: 0
+    explain: "`{action}` runs per line; `END {}` runs once after. `s+=$3` accumulates."
+    tags: [awk]
+
+  # ── permissions / sudo ───────────────────────────────────────────
+  - id: lin-umask
+    skill: linux
+    prompt: "After `umask 022`, what default mode do new files get?"
+    choices:
+      - "644 (rw-r--r--)"
+      - "755 (rwxr-xr-x)"
+      - "022 (-w--w--w-)"
+      - "022 stripped from 666 = 644 for files (no exec)"
+    answer: 3
+    explain: "umask is a mask: subtract from default 666 (files) or 777 (dirs). 666 - 022 = 644."
+    tags: [permissions]
+
+  - id: lin-symlink
+    skill: linux
+    prompt: "Create a symlink `latest` pointing at `release-2024-09`."
+    choices:
+      - "ln -s release-2024-09 latest"
+      - "ln release-2024-09 latest"
+      - "link release-2024-09 latest"
+      - "symlink release-2024-09 latest"
+    answer: 0
+    explain: "`-s` makes it symbolic. Without `-s`, you'd create a hard link (different semantics)."
+    tags: [filesystem]
+
+  - id: lin-sudo-preserve
+    skill: linux
+    prompt: "Run `mycmd` as root while preserving your environment variables."
+    choices:
+      - "sudo -E mycmd"
+      - "sudo --keep-env mycmd"
+      - "sudo --preserve-env=ALL mycmd"
+      - "env sudo mycmd"
+    answer: 0
+    explain: "`-E` preserves env. By default sudo strips most env for security."
+    tags: [sudo]
+
+  # ── package management (Ubuntu/Canonical) ────────────────────────
+  - id: lin-apt-update
+    skill: linux
+    prompt: "Refresh APT package lists, then upgrade all installed packages."
+    choices:
+      - "sudo apt update && sudo apt upgrade"
+      - "sudo apt-get refresh"
+      - "sudo apt install --all"
+      - "sudo apt sync"
+    answer: 0
+    explain: "`update` refreshes the package index; `upgrade` installs newer versions."
+    tags: [apt, debian]
+
+  - id: lin-dpkg-query
+    skill: linux
+    prompt: "Which package owns the file `/usr/bin/python3`?"
+    choices:
+      - "dpkg -S /usr/bin/python3"
+      - "dpkg -L python3"
+      - "apt info python3"
+      - "which python3"
+    answer: 0
+    explain: "`dpkg -S` searches by filename. `-L` lists files in a package."
+    tags: [dpkg, debian]
+
+  # ── networking ───────────────────────────────────────────────────
+  - id: lin-curl-post
+    skill: linux
+    prompt: "POST JSON `{\"name\":\"x\"}` to https://api/ with proper Content-Type."
+    choices:
+      - "curl -X POST -H 'Content-Type: application/json' -d '{\"name\":\"x\"}' https://api/"
+      - "curl --post '{\"name\":\"x\"}' https://api/"
+      - "curl -d '{\"name\":\"x\"}' https://api/ --json"
+      - "curl https://api/ --body '{\"name\":\"x\"}'"
+    answer: 0
+    explain: "`-X` method, `-H` header, `-d` body. Modern curl also has `--json` shortcut."
+    tags: [curl, http]
+
+  - id: lin-rsync-mirror
+    skill: linux
+    prompt: "Mirror local `./build/` to `user@host:/srv/site/`, deleting remote-only files."
+    choices:
+      - "rsync -avz --delete ./build/ user@host:/srv/site/"
+      - "rsync -r ./build/ user@host:/srv/site/"
+      - "scp -r ./build user@host:/srv/site/ --remove"
+      - "rsync ./build/ user@host:/srv/site/ --mirror"
+    answer: 0
+    explain: "`-a` archive (perms+times), `-v` verbose, `-z` compress, `--delete` removes orphans on remote."
+    tags: [rsync]
+
+  # ── systemd / cron ───────────────────────────────────────────────
+  - id: lin-systemd-enable
+    skill: linux
+    prompt: "Make `nginx.service` start on boot AND start it now."
+    choices:
+      - "sudo systemctl enable --now nginx"
+      - "sudo systemctl enable nginx; reboot"
+      - "sudo service nginx auto"
+      - "sudo systemctl autostart nginx"
+    answer: 0
+    explain: "`enable --now` is shorthand for enable + start in one command."
+    tags: [systemd]
+
+  - id: lin-cron-schedule
+    skill: linux
+    prompt: "Cron expression to run a job every weekday at 09:30."
+    choices:
+      - "30 9 * * 1-5"
+      - "9 30 * * MON-FRI"
+      - "* 9:30 * * 1-5"
+      - "30 9 * * weekdays"
+    answer: 0
+    explain: "Format: minute hour day-of-month month day-of-week. 1-5 = Mon-Fri."
+    tags: [cron]
+
+  # ── shell scripting ──────────────────────────────────────────────
+  - id: lin-bash-cmdsubst
+    skill: linux
+    prompt: "Modern command substitution syntax (preferred over backticks)."
+    choices:
+      - "result=$(cmd args)"
+      - "result=`cmd args`"
+      - "result=cmd args"
+      - "result := cmd args"
+    answer: 0
+    explain: "`$(...)` nests cleanly and is preferred. Backticks are legacy."
+    tags: [bash]
+
+  - id: lin-bash-set-e
+    skill: linux
+    prompt: "Make a bash script exit immediately on any command failure."
+    choices:
+      - "set -e (or set -euo pipefail)"
+      - "exit on error"
+      - "trap ERR exit"
+      - "set --strict"
+    answer: 0
+    explain: "`-e` exit on error, `-u` undefined vars are errors, `-o pipefail` catches errors mid-pipe."
+    tags: [bash]

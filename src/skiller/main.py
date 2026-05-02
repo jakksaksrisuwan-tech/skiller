@@ -56,6 +56,7 @@ class SkillerApp(HotReloadable, App):
     #typing-meta { color: $accent; width: 1fr; height: 3; content-align: left middle; }
     #typing-lcd { color: $warning; width: 10; height: 3; content-align: right top; }
     #typing-done { padding: 0 3; height: 1; }
+    #typing-description { padding: 0 3; height: 1; color: $text-muted; }
     #typing-snippet { padding: 1 2; border: round $accent; height: auto; min-height: 3; }
     #typing-upcoming { padding: 0 3; height: auto; }
     #typing-stats { padding-top: 1; }
@@ -130,7 +131,10 @@ class SkillerApp(HotReloadable, App):
             self.push_screen(StatsScreen())
             return
         if key == "typing_drill":
-            self.push_screen(TypingScreen())
+            self.push_screen(TypingScreen(language="python"))
+            return
+        if key == "typing_linux":
+            self.push_screen(TypingScreen(language="linux"))
             return
         if key in TASK_DIRS:
             d = TASK_DIRS[key]

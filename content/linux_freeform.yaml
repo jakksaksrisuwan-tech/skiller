@@ -105,3 +105,156 @@ questions:
     canonical: "curl -I https://example.com/"
     explain: "`-I` (--head) issues HEAD and prints response headers."
     tags: [network, http]
+
+  - id: lin-ff-find-largest
+    skill: linux
+    prompt: |
+      Find the 5 largest files under /var (size desc).
+    patterns:
+      - '^\s*find\s+/var\s+(-type\s+f\s+)?-(printf|exec)\b.*\|\s*sort\s+-[hn]r?\s*\|\s*head\s*(-n?\s*5)?\s*$'
+      - '^\s*du\s+-(a\s*|ah?\s*)\s*/var\s*\|\s*sort\s+-hr\s*\|\s*head\s*(-n?\s*5)?\s*$'
+    canonical: "du -ah /var | sort -hr | head -n 5"
+    explain: "`du -ah` sizes incl. files; `sort -hr` human-readable reverse; `head -5` top 5."
+    tags: [find, disk, pipe]
+
+  - id: lin-ff-count-uniq-ips
+    skill: linux
+    prompt: |
+      Count unique IP addresses in column 1 of access.log (space-separated).
+    patterns:
+      - "^\\s*awk\\s+'[{]\\s*print\\s+\\$1\\s*[}]'\\s+access\\.log\\s*\\|\\s*sort\\s*\\|\\s*uniq\\s*\\|\\s*wc\\s+-l\\s*$"
+      - '^\s*cut\s+-d''?\s?''?\s+-f1\s+access\.log\s*\|\s*sort\s+-u\s*\|\s*wc\s+-l\s*$'
+    canonical: "awk '{print $1}' access.log | sort | uniq | wc -l"
+    explain: "`uniq` requires sorted input. `sort -u` is the same in one step."
+    tags: [pipe, awk, uniq]
+
+  - id: lin-ff-rsync-archive
+    skill: linux
+    prompt: |
+      rsync ./src/ to /backup/src/ — archive mode, verbose, compressed, delete orphans.
+    patterns:
+      - '^\s*rsync\s+-avz?\s*--delete\s+\./src/\s+/backup/src/?\s*$'
+      - '^\s*rsync\s+-a\s+-v\s+-z?\s*--delete\s+\./src/\s+/backup/src/?\s*$'
+    canonical: "rsync -avz --delete ./src/ /backup/src/"
+    explain: "Trailing `/` on source means contents (not the dir itself). `-z` compresses over network."
+    tags: [rsync, backup]
+
+  - id: lin-ff-tar-exclude
+    skill: linux
+    prompt: |
+      Create backup.tar.gz of src/ excluding all *.pyc files.
+    patterns:
+      - "^\\s*tar\\s+-czv?f\\s+backup\\.tar\\.gz\\s+--exclude='?\\*?\\.pyc'?\\s+src/?\\s*$"
+      - "^\\s*tar\\s+--exclude='?\\*\\.pyc'?\\s+-czv?f\\s+backup\\.tar\\.gz\\s+src/?\\s*$"
+    canonical: "tar -czvf backup.tar.gz --exclude='*.pyc' src/"
+    explain: "`--exclude` accepts a glob; quote it so the shell doesn't expand it."
+    tags: [tar, archive]
+
+  - id: lin-ff-cron-edit
+    skill: linux
+    prompt: |
+      Edit the current user's cron table.
+    patterns:
+      - '^\s*crontab\s+-e\s*$'
+    canonical: "crontab -e"
+    explain: "`-e` edit, `-l` list, `-r` remove. Use `-u user` (as root) to edit another user's tab."
+    tags: [cron]
+
+  - id: lin-ff-systemd-restart
+    skill: linux
+    prompt: |
+      Restart the nginx service via systemd.
+    patterns:
+      - '^\s*sudo\s+systemctl\s+restart\s+nginx(\.service)?\s*$'
+      - '^\s*systemctl\s+restart\s+nginx(\.service)?\s*$'
+    canonical: "sudo systemctl restart nginx"
+    explain: "`.service` suffix is optional. Most lifecycle ops need sudo."
+    tags: [systemd]
+
+  - id: lin-ff-journalctl-since
+    skill: linux
+    prompt: |
+      Show the nginx unit's logs from the last hour.
+    patterns:
+      - "^\\s*journalctl\\s+-u\\s+nginx(\\.service)?\\s+--since\\s+['\"]?1\\s*hour\\s*ago['\"]?\\s*$"
+      - "^\\s*sudo\\s+journalctl\\s+-u\\s+nginx(\\.service)?\\s+--since\\s+['\"]?1\\s*hour\\s*ago['\"]?\\s*$"
+    canonical: "journalctl -u nginx --since '1 hour ago'"
+    explain: "`--since` accepts natural language: '1 hour ago', 'yesterday', 'today'."
+    tags: [systemd, logs]
+
+  - id: lin-ff-find-recent
+    skill: linux
+    prompt: |
+      Find files under . modified in the last 24 hours.
+    patterns:
+      - '^\s*find\s+\.\s+(-type\s+f\s+)?-mtime\s+-1\s*$'
+      - '^\s*find\s+\.\s+(-type\s+f\s+)?-mmin\s+-1440\s*$'
+    canonical: "find . -type f -mtime -1"
+    explain: "`-mtime -1` = less than 1 day. `-mmin` is in minutes (1440 = 24h)."
+    tags: [find]
+
+  - id: lin-ff-which
+    skill: linux
+    prompt: |
+      Print the path of the python3 binary that the shell will execute.
+    patterns:
+      - '^\s*which\s+python3\s*$'
+      - '^\s*type\s+python3\s*$'
+      - '^\s*command\s+-v\s+python3\s*$'
+    canonical: "which python3"
+    explain: "`type` is the bash-builtin equivalent and shows aliases too. `command -v` is POSIX-portable."
+    tags: [shell, path]
+
+  - id: lin-ff-export-path
+    skill: linux
+    prompt: |
+      Add ~/.local/bin to the front of PATH for the current shell.
+    patterns:
+      - '^\s*export\s+PATH="?\$HOME/\.local/bin:\$PATH"?\s*$'
+      - "^\\s*export\\s+PATH=~/\\.local/bin:\\$PATH\\s*$"
+    canonical: 'export PATH="$HOME/.local/bin:$PATH"'
+    explain: "Quoting prevents word-splitting. `~` only expands at start; use `$HOME` mid-string."
+    tags: [shell, env]
+
+  - id: lin-ff-perm-add-x
+    skill: linux
+    prompt: |
+      Make script.sh executable for owner only (symbolic, additive).
+    patterns:
+      - '^\s*chmod\s+u\+x\s+script\.sh\s*$'
+    canonical: "chmod u+x script.sh"
+    explain: "`u` owner, `+x` add execute. Doesn't touch group/other bits."
+    tags: [permissions]
+
+  - id: lin-ff-jq-field
+    skill: linux
+    prompt: |
+      Extract the .name field from each object in a JSON array `data.json`.
+    patterns:
+      - "^\\s*jq\\s+-r\\s+'?\\.\\[\\]\\.name'?\\s+data\\.json\\s*$"
+      - '^\s*jq\s+''\.\[\]\.name''\s+data\.json\s*$'
+    canonical: "jq -r '.[].name' data.json"
+    explain: "`.[]` iterates array elements; `.name` extracts the field. `-r` strips quotes."
+    tags: [jq, json]
+
+  - id: lin-ff-ssh-tunnel
+    skill: linux
+    prompt: |
+      SSH-forward localhost:8080 to remote.host:80 (background, no shell).
+    patterns:
+      - '^\s*ssh\s+-N\s+-f?\s*-L\s+8080:(localhost|remote\.host):80\s+\S+@?remote\.host\s*$'
+      - '^\s*ssh\s+-fNL\s+8080:(localhost|remote\.host):80\s+\S+@?remote\.host\s*$'
+    canonical: "ssh -fN -L 8080:localhost:80 user@remote.host"
+    explain: "`-L` local-forward, `-N` no command, `-f` background. Visit http://localhost:8080."
+    tags: [ssh, network]
+
+  - id: lin-ff-grep-multifile-line
+    skill: linux
+    prompt: |
+      Recursively grep for "TODO" in all *.py files, showing filename + line number.
+    patterns:
+      - "^\\s*grep\\s+-rn\\s+--include=['\"]?\\*\\.py['\"]?\\s+['\"]?TODO['\"]?\\s+\\.?\\s*$"
+      - "^\\s*grep\\s+-rn\\s+['\"]?TODO['\"]?\\s+--include=['\"]?\\*\\.py['\"]?\\s+\\.?\\s*$"
+    canonical: "grep -rn --include='*.py' 'TODO' ."
+    explain: "`-r` recursive, `-n` line numbers, `--include` glob filter."
+    tags: [grep]

@@ -1,24 +1,26 @@
 from __future__ import annotations
 
 import random
-import re
 import time
 
 from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.containers import Vertical
 from textual.screen import Screen
-from textual.widgets import Footer, Header, Input, Static
+from textual.widgets import Footer, Header, Static
 
-from ..content import load_quiz_items, schedule_session
+from ..content import load_freeforms, load_quiz_items, schedule_session
 from ..models import MCQ, Freeform
 from ..ui import StopwatchLabel
 
 
+# Question state machine. (Freeform now renders as MCQ-style with auto-
+# generated distractors; the typing/Input flow has been retired.)
 S_PICKING = "picking"
-S_TYPING = "typing"
 S_CONFIDENCE = "confidence"
 S_REVEALED = "revealed"
+
+DISTRACTORS_PER_QUESTION = 3  # total choices = 1 canonical + 3 distractors
 
 
 class MCQScreen(Screen):
@@ -41,14 +43,21 @@ class MCQScreen(Screen):
         self.n = n
         self.items: list[MCQ | Freeform] = []
         self.idx = 0
-        self.cursor = 0  # MCQ choice cursor
+        self.cursor = 0  # display-position cursor
         self.state = S_PICKING
-        self.user_text = ""
         self.user_correct = False
         self.q_started: float = 0.0
         self.correct_count = 0
         self.session_grades: list[int] = []
-        self._perm: list[int] = []  # shuffled-choice permutation for current MCQ
+        # Per-question rendering data — populated in _show_question. For MCQ:
+        # comes straight from the item. For Freeform: built from canonical +
+        # distractors sampled from sibling Freeforms.
+        self._choices: list[str] = []
+        self._answer_idx: int = 0  # index of correct answer in self._choices
+        # Distractor pool = ALL freeforms in this category (not just the
+        # ~12 sampled for the session — that pool is too small to fill 3
+        # distractors when only a handful are freeforms).
+        self._distractor_pool: list[Freeform] = []
 
     def compose(self) -> ComposeResult:
         yield Header()
@@ -57,7 +66,6 @@ class MCQScreen(Screen):
             StopwatchLabel("⏱  00:00", id="watch", tick_seconds=0.5),
             Static(" ", id="prompt"),
             Static(" ", id="answer-area"),
-            Static(" ", id="ff-slot"),
             Static(" ", id="feedback"),
             id="mcq-box",
         )
@@ -70,6 +78,7 @@ class MCQScreen(Screen):
             self.app.pop_screen()
             return
         self.items = schedule_session(items, self.app.store, self.n)  # type: ignore[attr-defined]
+        self._distractor_pool = load_freeforms(self.category)
         self.idx = 0
         self._show_question()
 
@@ -81,14 +90,12 @@ class MCQScreen(Screen):
             return
         item = self.items[self.idx]
         self.q_started = time.monotonic()
-        self.state = S_TYPING if isinstance(item, Freeform) else S_PICKING
+        self.state = S_PICKING
         self.cursor = 0
-        self.user_text = ""
 
         srs = self.app.store.srs.get(item.id)  # type: ignore[attr-defined]
         if srs and srs.last_seen:
-            days = srs.interval_days
-            sched = f"interval {days:.0f}d, ease {srs.ease:.2f}, reps {srs.reps}"
+            sched = f"interval {srs.interval_days:.0f}d, ease {srs.ease:.2f}, reps {srs.reps}"
         else:
             sched = "[dim]new[/dim]"
         kind_label = "FF" if isinstance(item, Freeform) else "MCQ"
@@ -101,52 +108,60 @@ class MCQScreen(Screen):
         )
         self.query_one("#prompt", Static).update(f"[b]{item.prompt.strip()}[/b]")
         self.query_one("#feedback", Static).update(" ")
-        # Remove any prior Input; mount fresh for Freeform.
-        for old in self.query("Input"):
-            old.remove()
-        if isinstance(item, Freeform):
-            self.query_one("#answer-area", Static).update(
-                "[dim]Type answer. Enter when done.[/dim]"
-            )
-            inp = Input(placeholder="type answer...", id="ff-input")
-            self.query_one("#ff-slot", Static).update(" ")
-            self.mount(inp, after=self.query_one("#ff-slot"))
-            self.set_focus(inp)
-        else:
-            self.set_focus(None)
-            self._perm = list(range(len(item.choices)))
-            random.shuffle(self._perm)
-            self._render_choices(item)
+        self.set_focus(None)
+        self._build_choices_for(item)
+        self._render_choices()
 
-    def _render_choices(self, q: MCQ) -> None:
-        # display position i shows the original choice at index self._perm[i]
-        display_answer = self._perm.index(q.answer) if self._perm else q.answer
+    def _build_choices_for(self, item) -> None:
+        """Populate `self._choices` + `self._answer_idx` for the current item.
+        MCQ: shuffle the original choices. Freeform: take the canonical plus
+        N distractors sampled from sibling Freeform canonicals in the session,
+        then shuffle. Result: rendering and validation are identical for both
+        kinds — no Input widget, no regex matching."""
+        if isinstance(item, MCQ):
+            pairs = list(enumerate(item.choices))
+            random.shuffle(pairs)
+            self._choices = [c for _, c in pairs]
+            self._answer_idx = next(
+                i for i, (orig_i, _) in enumerate(pairs) if orig_i == item.answer
+            )
+            return
+        # Freeform — synthesize choices from the FULL category pool (not just
+        # the session items — that pool is too small to reliably fill 3
+        # distractors when only a few of the 12 sampled items are Freeforms).
+        sibling_canonicals = [
+            q.canonical for q in self._distractor_pool
+            if q.id != item.id and q.canonical != item.canonical
+        ]
+        # Dedupe while preserving sample integrity.
+        sibling_canonicals = list(dict.fromkeys(sibling_canonicals))
+        k = min(DISTRACTORS_PER_QUESTION, len(sibling_canonicals))
+        distractors = random.sample(sibling_canonicals, k=k) if k else []
+        choices = [item.canonical] + distractors
+        random.shuffle(choices)
+        self._choices = choices
+        self._answer_idx = choices.index(item.canonical)
+
+    def _render_choices(self) -> None:
         lines = []
-        for i, orig_i in enumerate(self._perm or list(range(len(q.choices)))):
-            c = q.choices[orig_i]
+        for i, choice in enumerate(self._choices):
             marker = "▶" if i == self.cursor and self.state == S_PICKING else " "
             tag = ""
-            if self.state in (S_CONFIDENCE, S_REVEALED):
-                if self.state == S_REVEALED:
-                    if i == display_answer:
-                        tag = "[green]✓[/green] "
-                    elif i == self.cursor and self.cursor != display_answer:
-                        tag = "[red]✗[/red] "
-                    else:
-                        tag = "  "
+            if self.state == S_REVEALED:
+                if i == self._answer_idx:
+                    tag = "[green]✓[/green] "
+                elif i == self.cursor and self.cursor != self._answer_idx:
+                    tag = "[red]✗[/red] "
                 else:
-                    if i == self.cursor:
-                        tag = "[yellow]●[/yellow] "
-                    else:
-                        tag = "  "
-            lines.append(f"{marker} [b]{i + 1}.[/b] {tag}{c}")
+                    tag = "  "
+            elif self.state == S_CONFIDENCE:
+                tag = "[yellow]●[/yellow] " if i == self.cursor else "  "
+            lines.append(f"{marker} [b]{i + 1}.[/b] {tag}{choice}")
         self.query_one("#answer-area", Static).update("\n".join(lines))
 
     def _ask_confidence(self) -> None:
         self.state = S_CONFIDENCE
-        item = self.items[self.idx]
-        if isinstance(item, MCQ):
-            self._render_choices(item)
+        self._render_choices()
         self.query_one("#feedback", Static).update(
             "[b]How sure?[/b] press [b]1[/b]=guess … [b]5[/b]=certain"
         )
@@ -154,21 +169,17 @@ class MCQScreen(Screen):
     # ------- input handlers -------
 
     def action_move(self, delta: int) -> None:
-        if self.state != S_PICKING:
+        if self.state != S_PICKING or not self._choices:
             return
-        item = self.items[self.idx]
-        if not isinstance(item, MCQ):
-            return
-        self.cursor = (self.cursor + delta) % len(item.choices)
-        self._render_choices(item)
+        self.cursor = (self.cursor + delta) % len(self._choices)
+        self._render_choices()
 
     def action_key(self, k: str) -> None:
         n = int(k)
         if self.state == S_PICKING:
-            item = self.items[self.idx]
-            if isinstance(item, MCQ) and 1 <= n <= len(item.choices):
+            if 1 <= n <= len(self._choices):
                 self.cursor = n - 1
-                self._render_choices(item)
+                self._render_choices()
         elif self.state == S_CONFIDENCE:
             if 1 <= n <= 5:
                 self._reveal(n)
@@ -176,47 +187,12 @@ class MCQScreen(Screen):
     def action_confirm(self) -> None:
         if self.state == S_PICKING:
             self._lock_pick()
-        elif self.state == S_TYPING:
-            self._lock_typed()
         elif self.state == S_REVEALED:
             self.idx += 1
             self._show_question()
 
-    def on_input_submitted(self, event: Input.Submitted) -> None:
-        if self.state == S_TYPING:
-            self.user_text = event.value
-            self._lock_typed()
-
     def _lock_pick(self) -> None:
-        item = self.items[self.idx]
-        if not isinstance(item, MCQ):
-            return
-        # cursor refers to display position; map back to original choice index
-        chosen_orig = self._perm[self.cursor] if self._perm else self.cursor
-        self.user_correct = chosen_orig == item.answer
-        self._ask_confidence()
-
-    def _lock_typed(self) -> None:
-        item = self.items[self.idx]
-        if not isinstance(item, Freeform):
-            return
-        if not self.user_text:
-            try:
-                self.user_text = self.query_one("#ff-input", Input).value
-            except Exception:
-                self.user_text = ""
-        ans = self.user_text.strip()
-        self.user_correct = any(
-            re.match(p, ans, re.IGNORECASE | re.MULTILINE | re.DOTALL)
-            for p in item.patterns
-        )
-        # Remove input so digit keys reach screen bindings for confidence step.
-        for old in self.query("Input"):
-            old.remove()
-        self.set_focus(None)
-        self.query_one("#answer-area", Static).update(
-            f"[b]you wrote:[/b]  {ans or '[dim](empty)[/dim]'}"
-        )
+        self.user_correct = self.cursor == self._answer_idx
         self._ask_confidence()
 
     def _reveal(self, confidence: int) -> None:
@@ -234,15 +210,7 @@ class MCQScreen(Screen):
         )
         self.session_grades.append(grade)
         self.state = S_REVEALED
-        if isinstance(item, MCQ):
-            self._render_choices(item)
-        else:
-            ans = self.user_text.strip()
-            mark = "[green]✓[/green]" if self.user_correct else "[red]✗[/red]"
-            self.query_one("#answer-area", Static).update(
-                f"[b]you wrote:[/b]  {ans or '[dim](empty)[/dim]'}  {mark}\n"
-                f"[b]canonical:[/b]  [cyan]{item.canonical}[/cyan]"
-            )
+        self._render_choices()
 
         verdict = "[green]Correct[/green]" if self.user_correct else "[red]Wrong[/red]"
         srs = self.app.store.srs[item.id]  # type: ignore[attr-defined]
@@ -270,8 +238,6 @@ class MCQScreen(Screen):
         )
         self.query_one("#prompt", Static).update(" ")
         self.query_one("#answer-area", Static).update(" ")
-        for old in self.query("Input"):
-            old.remove()
         self.query_one("#feedback", Static).update(
             "Press [b]Esc[/b] to return to menu."
         )

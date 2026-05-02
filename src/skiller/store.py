@@ -23,6 +23,22 @@ class Store:
         # cleared by typing the correct char (via retry or backspace+correct).
         self.total_corrections: int = 0
         self.total_skipped_recoveries: int = 0  # subset: correction after auto-advance
+        # Bigram-level keystroke timing — EMA so recent timings dominate
+        # (otherwise an old slow attempt would drag the average forever).
+        # bigram_avg_ms[bg] = EMA-smoothed time to type the 2nd char of bg.
+        # bigram_count[bg]  = sample count (capped via natural growth).
+        # bigram_errors[bg] = wrong-key count when typing 2nd char of bg.
+        self.bigram_avg_ms: dict[str, float] = {}
+        self.bigram_count: dict[str, int] = {}
+        self.bigram_errors: dict[str, int] = {}
+        # Per-snippet cache; invalidated in `record_typing`. Avoids a full
+        # walk of `self.structures` on every keystroke via `record_bigram_time`.
+        self._cached_graduation_ms: float | None = None
+        # Correction-drill lifetime counters.
+        self.correction_mode_enters: int = 0   # F4 ON activations
+        self.total_drill_completions: int = 0  # synthetic drill snippets typed
+        self.total_graduations: int = 0        # bigrams crossing threshold downward
+        self.total_pool_clears: int = 0        # times all bigrams graduated → exit
         self.load()
 
     def load(self) -> None:
@@ -40,6 +56,20 @@ class Store:
         self.achievements = dict(data.get("achievements", {}))
         self.total_corrections = int(data.get("total_corrections", 0))
         self.total_skipped_recoveries = int(data.get("total_skipped_recoveries", 0))
+        self.bigram_count = dict(data.get("bigram_count", {}))
+        self.bigram_avg_ms = dict(data.get("bigram_avg_ms", {}))
+        self.bigram_errors = dict(data.get("bigram_errors", {}))
+        self.correction_mode_enters = int(data.get("correction_mode_enters", 0))
+        self.total_drill_completions = int(data.get("total_drill_completions", 0))
+        self.total_graduations = int(data.get("total_graduations", 0))
+        self.total_pool_clears = int(data.get("total_pool_clears", 0))
+        # Migrate from earlier sum-based schema if encountered.
+        legacy_total = data.get("bigram_total_ms")
+        if legacy_total and not self.bigram_avg_ms:
+            for bg, total in legacy_total.items():
+                cnt = self.bigram_count.get(bg, 0)
+                if cnt > 0:
+                    self.bigram_avg_ms[bg] = total / cnt
 
     def save(self) -> None:
         data = {
@@ -50,6 +80,13 @@ class Store:
             "achievements": dict(self.achievements),
             "total_corrections": self.total_corrections,
             "total_skipped_recoveries": self.total_skipped_recoveries,
+            "bigram_count": dict(self.bigram_count),
+            "bigram_avg_ms": dict(self.bigram_avg_ms),
+            "bigram_errors": dict(self.bigram_errors),
+            "correction_mode_enters": self.correction_mode_enters,
+            "total_drill_completions": self.total_drill_completions,
+            "total_graduations": self.total_graduations,
+            "total_pool_clears": self.total_pool_clears,
         }
         tmp = self.path.with_suffix(".tmp")
         tmp.write_text(json.dumps(data, indent=2))
@@ -68,6 +105,7 @@ class Store:
         now = _t.time()
         s = self.structures.setdefault(structure, StructureStat(structure=structure))
         s.record(chars=chars, errors=errors, ms=ms, now=now)
+        self._cached_graduation_ms = None  # lifetime stats changed; recompute on next read
         # Append to attempts log so the stats screen can roll up time-series.
         self.attempts.append(
             Attempt(
@@ -98,6 +136,80 @@ class Store:
             return "", 0.0
         best = max(self.structures.values(), key=lambda s: s.best_wpm)
         return best.structure, best.best_wpm
+
+    BIGRAM_EMA_ALPHA = 0.18  # ~half-life of ~3.5 samples; recent dominates
+
+    def record_bigram_time(self, bigram: str, ms: float) -> None:
+        """EMA-update keystroke timing for a 2-char sequence.
+        Tracks graduation events: when avg crosses the threshold downward
+        AND the bigram had ≥5 samples (qualifying it as struggle data),
+        increment `total_graduations`."""
+        if len(bigram) != 2 or ms <= 0:
+            return
+        threshold = self.typing_graduation_ms()
+        prior_count = self.bigram_count.get(bigram, 0)
+        prior_avg = self.bigram_avg_ms.get(bigram, 0.0)
+        was_struggling = prior_count >= 5 and prior_avg >= threshold
+        if bigram in self.bigram_avg_ms:
+            self.bigram_avg_ms[bigram] = (
+                self.BIGRAM_EMA_ALPHA * ms
+                + (1 - self.BIGRAM_EMA_ALPHA) * prior_avg
+            )
+        else:
+            self.bigram_avg_ms[bigram] = ms
+        self.bigram_count[bigram] = prior_count + 1
+        new_avg = self.bigram_avg_ms[bigram]
+        is_struggling_now = (prior_count + 1) >= 5 and new_avg >= threshold
+        if was_struggling and not is_struggling_now:
+            self.total_graduations += 1
+
+    def record_bigram_error(self, bigram: str) -> None:
+        if len(bigram) != 2:
+            return
+        self.bigram_errors[bigram] = self.bigram_errors.get(bigram, 0) + 1
+
+    def top_struggle_bigrams(
+        self,
+        n: int = 5,
+        min_count: int = 5,
+        graduation_ms: float = 0.0,
+    ) -> list[tuple[str, float, int]]:
+        """Top-N slowest bigrams. Returns (bigram, avg_ms, error_count).
+        Score = avg_ms × (1 + error_rate); favours slow + error-prone.
+        Bigrams whose avg_ms drops below `graduation_ms` are excluded —
+        they've been mastered and no longer need drilling.
+
+        Bigrams that are PURELY whitespace are skipped — the resulting drill
+        ('         ' ×8) is invisible. Mixed bigrams like ' -' or ': ' stay
+        in: they exercise a real finger pattern and the visible char anchors
+        the drill on screen."""
+        rows = []
+        for bg, count in self.bigram_count.items():
+            if count < min_count:
+                continue
+            if not bg.strip():
+                continue
+            avg_ms = self.bigram_avg_ms.get(bg, 0.0)
+            if graduation_ms and avg_ms < graduation_ms:
+                continue
+            errors = self.bigram_errors.get(bg, 0)
+            score = avg_ms * (1 + errors / max(1, count))
+            rows.append((bg, avg_ms, errors, score))
+        rows.sort(key=lambda r: r[3], reverse=True)
+        return [(bg, avg_ms, err) for bg, avg_ms, err, _ in rows[:n]]
+
+    def typing_graduation_ms(self) -> float:
+        """Per-keystroke ms threshold below which a bigram is 'mastered' and
+        drops out of the correction-mode drill pool. Tracks personal target
+        but never below 150ms (~80 wpm) — past that it's just signal noise.
+
+        Cached because this is called per-keystroke via `record_bigram_time`;
+        the underlying lifetime stats only change on snippet completion."""
+        if self._cached_graduation_ms is None:
+            target_wpm = self.typing_personal_target()
+            target_ms = 60_000.0 / (5 * target_wpm)
+            self._cached_graduation_ms = max(150.0, target_ms)
+        return self._cached_graduation_ms
 
     def typing_personal_target(self, floor: float = 40.0, lift: float = 1.15) -> float:
         """Floating per-user wpm target. = max(floor, lifetime_avg * lift).
@@ -132,7 +244,6 @@ class Store:
 
     def typing_minutes_on(self, day_offset: int = 0) -> float:
         """Minutes typing on a given day. day_offset 0=today, 1=yesterday."""
-        import time as _t
         from datetime import date, datetime, timedelta
         target = date.today() - timedelta(days=day_offset)
         total = 0.0

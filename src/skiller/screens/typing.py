@@ -3,8 +3,19 @@ from __future__ import annotations
 
 import time
 
+from rich.markup import escape as _escape_markup
 from rich.text import Text
 
+from textual import events
+from textual.app import ComposeResult
+from textual.binding import Binding
+from textual.containers import Horizontal, Vertical
+from textual.screen import Screen
+from textual.widgets import Footer, Header, Static
+
+from ..achievements import TIER_GLYPH, check_unlocks
+from ..content import load_snippets, pick_snippet
+from ..models import TypingSnippet
 from ..ui import progress_bar as _bar
 
 
@@ -35,16 +46,6 @@ def _lcd(s: str) -> str:
             rows[i] += line
     return "\n".join(rows)
 
-from textual import events
-from textual.app import ComposeResult
-from textual.binding import Binding
-from textual.containers import Horizontal, Vertical
-from textual.screen import Screen
-from textual.widgets import Footer, Header, Static
-
-from ..achievements import TIER_GLYPH, check_unlocks
-from ..content import load_snippets, pick_snippet
-
 
 class TypingScreen(Screen):
     BINDINGS = [
@@ -52,13 +53,15 @@ class TypingScreen(Screen):
         Binding("f1", "toggle_scoreboard", "Scoreboard"),
         Binding("f2", "next", "Skip"),
         Binding("f3", "achievements", "Achievements"),
+        Binding("f4", "toggle_correction", "Correction mode"),
     ]
 
     QUEUE_DEPTH = 3  # snippets shown below current as upcoming preview
 
-    def __init__(self) -> None:
+    def __init__(self, language: str = "python") -> None:
         super().__init__()
-        self.snippets = load_snippets()
+        self.language = language
+        self.snippets = load_snippets(language)
         self.current = None      # type: ignore[var-annotated]
         self.queue: list = []    # type: ignore[var-annotated]
         self.target: str = ""
@@ -84,6 +87,8 @@ class TypingScreen(Screen):
         self.session_started_real: float = 0.0       # set on first keystroke
         # Rolling WPM window: list of per-completion wpm values (last 10).
         self.recent_wpm: list[float] = []
+        self.correction_mode: bool = False  # F4 toggle
+        self._drill_cursor: int = 0  # round-robin index for correction drills
         self.show_scoreboard: bool = False  # collapsed by default
 
     def compose(self) -> ComposeResult:
@@ -95,6 +100,7 @@ class TypingScreen(Screen):
                 id="typing-top",
             ),
             Static(" ", id="typing-done"),
+            Static(" ", id="typing-description"),
             Static(" ", id="typing-snippet"),
             Static(" ", id="typing-upcoming"),
             Static(" ", id="typing-stats"),
@@ -102,7 +108,7 @@ class TypingScreen(Screen):
             Static(
                 "[dim]Type the snippet exactly. "
                 "Backspace corrects (errors stay counted).\n"
-                "Esc back · F1 scoreboard · F2 skip · F3 achievements.[/dim]",
+                "Esc back · F1 scoreboard · F2 skip · F3 achievements · F4 correction.[/dim]",
                 id="typing-help",
             ),
             id="typing-box",
@@ -132,10 +138,20 @@ class TypingScreen(Screen):
     # ---- snippet lifecycle ----
 
     def _fill_queue(self) -> None:
-        """Top up the upcoming-snippets queue. Avoid showing the same id twice
-        in current+queue so the preview reads as variety."""
+        """Top up the upcoming-snippets queue. In correction mode, queue is
+        filled with synthetic bigram drills instead of real snippets."""
         store = self.app.store  # type: ignore[attr-defined]
-        for _ in range(20):  # bounded retries; corpus may be small
+        if self.correction_mode:
+            drills = self._build_correction_drills(store)
+            if not drills:
+                # No struggle data yet — fall back to normal sampling.
+                self.correction_mode = False
+            else:
+                while len(self.queue) < self.QUEUE_DEPTH:
+                    self.queue.append(drills[self._drill_cursor % len(drills)])
+                    self._drill_cursor += 1
+                return
+        for _ in range(20):
             if len(self.queue) >= self.QUEUE_DEPTH:
                 return
             snip = pick_snippet(self.snippets, store)
@@ -147,6 +163,33 @@ class TypingScreen(Screen):
             if snip.id in visible_ids:
                 continue
             self.queue.append(snip)
+
+    def _build_correction_drills(self, store) -> list:
+        """Synthesize drill snippets from the user's *currently* slow bigrams.
+        Bigrams whose EMA avg_ms drops below the graduation threshold are
+        excluded — as the user gets faster, drills disappear, and when none
+        remain, correction mode auto-exits with a celebration."""
+        graduation = store.typing_graduation_ms()
+        top = store.top_struggle_bigrams(n=6, graduation_ms=graduation)
+        if not top:
+            return []
+        drills = []
+        for bg, _avg_ms, _err in top:
+            drills.append(TypingSnippet(
+                id=f"drill-spaced-{bg}",
+                structure=f"drill[{bg}]",
+                text=" ".join([bg] * 8),
+                language=self.language,
+                difficulty=1,
+            ))
+            drills.append(TypingSnippet(
+                id=f"drill-tight-{bg}",
+                structure=f"drill[{bg}]",
+                text=bg * 8,
+                language=self.language,
+                difficulty=1,
+            ))
+        return drills
 
     def _next_snippet(self) -> None:
         # Pull next from queue; refill behind it so preview stays full.
@@ -176,23 +219,45 @@ class TypingScreen(Screen):
             return
         store = self.app.store  # type: ignore[attr-defined]
         stat = store.structures.get(snip.structure)
+        # Structure names can contain markup-special chars (e.g. drill bigrams
+        # like '/e' or ']'), so escape before interpolating into a markup string.
+        struct = _escape_markup(snip.structure)
         if stat and stat.completions:
             head = (
-                f"[b]{snip.structure}[/b]   "
+                f"[b]{struct}[/b]   "
                 f"[dim]wpm {stat.wpm:.0f}  acc {stat.accuracy:.0%}  "
                 f"runs {stat.completions}[/dim]"
             )
         else:
-            head = f"[b]{snip.structure}[/b]   [dim]new structure[/dim]"
+            head = f"[b]{struct}[/b]   [dim]new structure[/dim]"
+        if self.correction_mode:
+            head += "   [yellow]🎯 correction[/yellow]"
         self.query_one("#typing-meta", Static).update(head)
         self.query_one("#typing-lcd", Static).update(self._render_lcd())
         self.query_one("#typing-done", Static).update(self._render_done())
+        # Description annotates the just-typed snippet shown above (done line),
+        # not the current one — explanation lands AFTER you read the command.
+        last_desc = (
+            self.last_completion.get("description", "")
+            if self.last_completion else ""
+        )
+        self.query_one("#typing-description", Static).update(
+            Text.assemble(("↳ ", "dim italic"), (last_desc, "dim italic"))
+            if last_desc else " "  # never pass "" to Static.update — see above
+        )
         self.query_one("#typing-snippet", Static).update(self._render_target())
         self.query_one("#typing-upcoming", Static).update(self._render_upcoming())
         self.query_one("#typing-stats", Static).update(self._render_stats())
-        # Scoreboard is the expensive bit (walks store.attempts twice for
-        # streak/today). Only refresh on completion or explicit toggle, NOT on
-        # every keystroke.
+        # Scoreboard / lcd / description / done / upcoming all change only at
+        # snippet boundaries — they're already covered above for the snippet-
+        # swap path. Per-keystroke updates use `_refresh_live` instead.
+
+    def _refresh_live(self) -> None:
+        """Per-keystroke refresh — only widgets that change with the cursor."""
+        if self.current is None:
+            return
+        self.query_one("#typing-snippet", Static).update(self._render_target())
+        self.query_one("#typing-stats", Static).update(self._render_stats())
 
     def _refresh_scoreboard(self) -> None:
         if self.show_scoreboard:
@@ -239,7 +304,8 @@ class TypingScreen(Screen):
 
     def _render_done(self) -> Text:
         if not self.last_completion:
-            return Text("")
+            return Text(" ")  # single space — Textual 8.2 has a render-None
+                              # bug on completely empty Text content
         lc = self.last_completion
         body = lc.get("text", "")
         marker = lc.get("marker", "")
@@ -259,7 +325,7 @@ class TypingScreen(Screen):
 
     def _render_upcoming(self) -> Text:
         if not self.queue:
-            return Text("")
+            return Text(" ")  # avoid Textual 8.2 empty-content render bug
         text = Text()
         # graduated dimming: closer = brighter, further = more subdued
         styles = ["dim", "dim grey50", "dim grey39"]
@@ -337,7 +403,7 @@ class TypingScreen(Screen):
             bar = _bar(min(1.0, wpm / target_wpm))
             focus_line = (
                 f"[b]focus[/b]   "
-                f"weakest [yellow]{name}[/yellow] "
+                f"weakest [yellow]{_escape_markup(name)}[/yellow] "
                 f"[dim]{bar}[/dim] "
                 f"[b]{wpm:.0f}[/b]/{target_wpm:.0f} wpm "
                 f"([yellow]+{gap:.0f}[/yellow] to target)"
@@ -363,19 +429,45 @@ class TypingScreen(Screen):
             f"streak [b]{streak}[/b]d {streak_glyph}   "
             f"[dim]tier[/dim] [b]{tier_glyph}[/b]"
         )
-        return "\n".join([session_line, pr_line, focus_line, today_line])
+        # Struggle bigrams — surface the user's slowest 2-char sequences.
+        top_bg = store.top_struggle_bigrams(n=5)
+        if top_bg:
+            parts = [
+                f"[b]{_escape_markup(repr(bg))}[/b] {ms:.0f}ms"
+                + (f"+{err}e" if err else "")
+                for bg, ms, err in top_bg
+            ]
+            mode_tag = (
+                " [yellow]🎯 ON[/yellow]" if self.correction_mode else " [dim](F4 to drill)[/dim]"
+            )
+            struggle_line = "[b]struggle[/b]   " + "  ".join(parts) + mode_tag
+        else:
+            struggle_line = (
+                "[b]struggle[/b]   "
+                "[dim]not enough data yet — keep typing[/dim]"
+            )
+        return "\n".join([session_line, pr_line, focus_line, today_line, struggle_line])
 
     # ---- key handling ----
 
     async def on_key(self, event: events.Key) -> None:
         # Handle bindings first by letting Textual process them, then snipe printable.
-        if event.key in ("escape", "f1", "f2", "f3"):
+        if event.key in ("escape", "f1", "f2", "f3", "f4"):
             return  # let bindings handle
         now = time.monotonic()
         if event.key == "backspace":
-            if self.cursor > 0:
+            # First-wrong: red mark sits at cursor — clear it, cursor stays.
+            # Second-wrong: cursor auto-advanced past the red mark; first
+            # backspace pulls back onto the red and clears it.
+            # No nearby red: fall through to plain cursor-1 navigation.
+            if self.cursor in self.wrong_at:
+                del self.wrong_at[self.cursor]
+            elif (self.cursor - 1) in self.wrong_at:
                 self.cursor -= 1
-                self._refresh_view()
+                del self.wrong_at[self.cursor]
+            elif self.cursor > 0:
+                self.cursor -= 1
+            self._refresh_live()
             event.stop()
             return
         ch = event.character
@@ -394,28 +486,33 @@ class TypingScreen(Screen):
             return
         if ch == expected:
             dt_ms = max(0.0, (now - self.last_keystroke_at) * 1000)
-            # cap absurd pauses (>3s) so they don't poison the timing average
             if dt_ms > 3000:
                 dt_ms = 3000
             self.session_ms += dt_ms
             self.session_chars += 1
-            # Clear visual mistake mark on successful retry — stat stays.
+            # Bigram timing: how long to type the 2nd char of (prev, current)?
+            # Only count when prev was also typed within this snippet (cursor>=1).
+            if self.cursor >= 1:
+                bigram = self.target[self.cursor - 1 : self.cursor + 1]
+                self.app.store.record_bigram_time(bigram, dt_ms)  # type: ignore[attr-defined]
             prior_wrong = self.wrong_at.pop(self.cursor, 0)
             if prior_wrong >= 1:
                 self.corrections_this_run += 1
                 if prior_wrong >= 2:
-                    # was auto-advanced past; user came back via backspace
                     self.skipped_recoveries_this_run += 1
             self.cursor += 1
             self.last_keystroke_at = now
             if self.cursor >= len(self.target):
                 self._complete(now)
             else:
-                self._refresh_view()
+                self._refresh_live()
         else:
             self.errors_this_run += 1
             self.session_errors += 1
             self.wrong_at[self.cursor] = self.wrong_at.get(self.cursor, 0) + 1
+            if self.cursor >= 1:
+                bigram = self.target[self.cursor - 1 : self.cursor + 1]
+                self.app.store.record_bigram_error(bigram)  # type: ignore[attr-defined]
             # First wrong: stay put, mark red — user can retry.
             # Second wrong: auto-advance past this char so user isn't stuck.
             #   The position stays red as a permanent record. Backspace returns.
@@ -425,7 +522,7 @@ class TypingScreen(Screen):
                     self._complete(now)
                     event.stop()
                     return
-            self._refresh_view()
+            self._refresh_live()
         event.stop()
 
     def _complete(self, now: float) -> None:
@@ -441,13 +538,19 @@ class TypingScreen(Screen):
         prior_struct_pr = prior.best_wpm if prior else 0.0
         prior_overall_pr_pair = store.typing_personal_record()
         prior_overall_pr = prior_overall_pr_pair[1] if prior_overall_pr_pair else 0.0
-        store.record_typing(
-            structure=snip.structure,
-            item_id=snip.id,
-            chars=chars,
-            errors=self.errors_this_run,
-            ms=elapsed_ms,
-        )
+        # Synthetic correction drills should not pollute per-structure stats;
+        # the bigram-level data they generate (recorded per keystroke) is the
+        # actual learning signal for those.
+        if snip.is_synthetic_drill:
+            store.total_drill_completions += 1
+        else:
+            store.record_typing(
+                structure=snip.structure,
+                item_id=snip.id,
+                chars=chars,
+                errors=self.errors_this_run,
+                ms=elapsed_ms,
+            )
         store.total_corrections += self.corrections_this_run
         store.total_skipped_recoveries += self.skipped_recoveries_this_run
         self.session_completions += 1
@@ -522,6 +625,7 @@ class TypingScreen(Screen):
         self.last_completion = {
             "structure": snip.structure,
             "text": snip.text,
+            "description": snip.description,
             "wpm": wpm,
             "acc": chars / (chars + self.errors_this_run)
                 if (chars + self.errors_this_run) else 1.0,
@@ -535,6 +639,23 @@ class TypingScreen(Screen):
             self.set_timer(flash_ms / 1000, self._end_flash)
         # Scoreboard depends on lifetime/today data — recompute only here.
         self._refresh_scoreboard()
+        # If we were drilling and the user has now graduated every slow bigram,
+        # exit correction mode with a celebration.
+        pool_just_cleared = False
+        if self.correction_mode:
+            graduation = store.typing_graduation_ms()
+            remaining = store.top_struggle_bigrams(n=1, graduation_ms=graduation)
+            if not remaining:
+                self.correction_mode = False
+                store.total_pool_clears += 1
+                pool_just_cleared = True
+                self.notify(
+                    "🏁 every struggle bigram graduated! "
+                    "correction mode off — back to weakness sampling.",
+                    timeout=5,
+                )
+                self.queue.clear()
+                self._fill_queue()
         # check achievements; toast each newly unlocked
         session_minutes = (
             (time.monotonic() - self.session_started_real) / 60
@@ -553,6 +674,8 @@ class TypingScreen(Screen):
                 "brave_soul_session": self.errors_this_run >= 5,
                 "corrections_this_run": self.corrections_this_run,
                 "skipped_recovery_this_run": self.skipped_recoveries_this_run >= 1,
+                "is_drill_completion": snip.is_synthetic_drill,
+                "pool_just_cleared": pool_just_cleared,
             },
         )
         for ach in unlocked:
@@ -597,5 +720,48 @@ class TypingScreen(Screen):
     def action_achievements(self) -> None:
         from .achievements import AchievementsScreen
         self.app.push_screen(AchievementsScreen())
+
+    def action_toggle_correction(self) -> None:
+        store = self.app.store  # type: ignore[attr-defined]
+        if not self.correction_mode:
+            # Turning ON — verify there's struggle data, otherwise refuse.
+            top = store.top_struggle_bigrams(n=5)
+            if not top:
+                self.notify(
+                    "Need more typing data first — top struggle bigrams "
+                    "appear after ~5 samples each.",
+                    timeout=3,
+                )
+                return
+            self.correction_mode = True
+            self._drill_cursor = 0
+            store.correction_mode_enters += 1
+            store.save()
+            bigrams_str = " · ".join(_escape_markup(repr(bg)) for bg, _, _ in top)
+            self.notify(
+                f"🎯 correction mode ON — drilling: {bigrams_str}",
+                timeout=3,
+            )
+            # Fire achievement check now so Self-Aware unlocks on entry, not
+            # on the first drill completion.
+            for ach in check_unlocks(store, {"chain": 0, "session_best_chain": 0}):
+                self.notify(
+                    f"{TIER_GLYPH.get(ach.tier, '🏆')} [b]{ach.name}[/b] — {ach.desc}",
+                    title="Achievement unlocked",
+                    timeout=4,
+                )
+        else:
+            self.correction_mode = False
+            self.notify("correction mode OFF — back to weakness sampling.", timeout=2)
+        # Swap immediately: clear queue + jump to a fresh snippet from the new mode.
+        self.queue.clear()
+        self._fill_queue()
+        if self.queue:
+            self.current = self.queue.pop(0)
+            self.target = self.current.text
+            self._reset_run_state()
+            self._fill_queue()
+            self._refresh_view()
+        self._refresh_scoreboard()
 
 
