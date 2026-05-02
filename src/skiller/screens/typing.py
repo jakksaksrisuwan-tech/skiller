@@ -454,6 +454,18 @@ class TypingScreen(Screen):
         # Handle bindings first by letting Textual process them, then snipe printable.
         if event.key in ("escape", "f1", "f2", "f3", "f4"):
             return  # let bindings handle
+        # Modifier-only / nav keys must NOT count as wrong keystrokes —
+        # users hit Tab to switch panes, Ctrl/Alt for IDE shortcuts, etc.
+        # Shift+letter is allowed (it's how you type capitals); the prefix
+        # filter below catches "shift+tab" / "shift+enter" / etc., which
+        # arrive with explicit modifier names.
+        key = event.key
+        if (
+            key in ("tab", "shift+tab", "enter", "left", "right", "up", "down",
+                    "home", "end", "pageup", "pagedown", "insert", "delete")
+            or key.startswith(("ctrl+", "alt+", "meta+", "super+", "cmd+"))
+        ):
+            return
         now = time.monotonic()
         if event.key == "backspace":
             # First-wrong: red mark sits at cursor — clear it, cursor stays.
