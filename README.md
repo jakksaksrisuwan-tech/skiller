@@ -171,21 +171,38 @@ Punny names hidden until earned.
 
 ## Setup
 
-Requires `uv` (`brew install uv` on macOS) and Python 3.11+.
+Requires Python 3.11+ and [`uv`](https://docs.astral.sh/uv/).
 
-```bash
-./start.sh
-```
+| OS | Install `uv` | Run |
+|---|---|---|
+| macOS | `brew install uv` | `./start.sh` |
+| Linux | `curl -LsSf https://astral.sh/uv/install.sh \| sh` | `./start.sh` |
+| Windows | `winget install --id=astral-sh.uv` (or `pip install uv`) | `.\start.ps1` |
 
-What `start.sh` does:
+Both launchers do the same thing:
 
-1. Creates `.venv` and runs `uv pip install -e ".[dev]"` if missing
-2. Execs `uv run python dev.py`
+1. Create `.venv` and run `uv pip install -e ".[dev]"` if missing
+2. Exec `uv run python dev.py` (the hot-reload supervisor)
 
-`dev.py` is the hot-reload supervisor — watches `src/skiller/`, `content/`,
-`pyproject.toml` for `.py / .yaml / .toml / .tcss` changes, sends SIGTERM
-to the child, the child snapshots state to `.dev_state.json`, supervisor
-respawns with `--snapshot` so the current screen restores.
+`dev.py` watches `src/skiller/`, `content/`, `pyproject.toml` for
+`.py / .yaml / .toml / .tcss` changes. On save: SIGTERMs the child →
+child snapshots state to `.dev_state.json` → supervisor respawns with
+`--snapshot` → current screen restores.
+
+### Windows notes
+
+- **Use Windows Terminal** (or Windows Terminal Preview), not legacy
+  `cmd.exe`. The TUI needs Unicode + 24-bit colour + scrollback handling
+  that legacy console doesn't support.
+- **Hot-reload state-snapshot is Linux/macOS only** (relies on SIGTERM signal
+  handlers, which Windows kills hard). On Windows the supervisor + respawn
+  cycle work fine, but each respawn drops you on the menu instead of the
+  exact screen you were on. The drill itself is unaffected.
+- If PowerShell blocks `start.ps1`, run once:
+  `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`
+- Vim is not bundled. `git task` mode (the `e` key) suspends to your
+  `$EDITOR`. Set it: `$env:EDITOR = "nvim"` (or `code --wait`, `vim`, …)
+  before starting `.\start.ps1`.
 
 ## Offline
 
