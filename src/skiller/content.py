@@ -29,7 +29,7 @@ def load_mcqs(category: str | None = None) -> list[MCQ]:
 
 
 def _parse_mcq(path: Path) -> list[MCQ]:
-    data = yaml.safe_load(path.read_text()) or {}
+    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
     return [MCQ(**q) for q in data.get("questions", [])]
 
 
@@ -38,7 +38,7 @@ def load_freeforms(category: str | None = None) -> list[Freeform]:
     for f in CONTENT_DIR.glob("*_freeform.yaml"):
         if category and category not in f.stem:
             continue
-        data = yaml.safe_load(f.read_text()) or {}
+        data = yaml.safe_load(f.read_text(encoding="utf-8")) or {}
         out.extend(Freeform(**q) for q in data.get("questions", []))
     return out
 
@@ -64,7 +64,7 @@ def load_snippets(language: str | None = None) -> list[TypingSnippet]:
     pool (e.g. typing_linux.yaml) requires no loader changes."""
     out: list[TypingSnippet] = []
     for path in sorted(CONTENT_DIR.glob("typing_*.yaml")):
-        data = yaml.safe_load(path.read_text()) or {}
+        data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
         for s in data.get("snippets", []):
             snip = TypingSnippet(**s)
             if language is None or snip.language == language:
@@ -121,7 +121,7 @@ def load_tasks() -> list[Task]:
         manifest = d / "task.yaml"
         if not manifest.exists():
             continue
-        data = yaml.safe_load(manifest.read_text())
+        data = yaml.safe_load(manifest.read_text(encoding="utf-8"))
         out.append(
             Task(
                 id=data["id"],

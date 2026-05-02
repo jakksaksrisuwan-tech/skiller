@@ -25,7 +25,7 @@ def atomic_write(path: Path, data: str) -> None:
     """Write data to path atomically via tmp + os.replace (POSIX-atomic)."""
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(path.suffix + ".tmp")
-    tmp.write_text(data)
+    tmp.write_text(data, encoding="utf-8")
     os.replace(tmp, path)
 
 
@@ -66,7 +66,7 @@ class HotReloadable:
         self._hr_state_path = state_path
         if state_path.exists():
             try:
-                data = json.loads(state_path.read_text())
+                data = json.loads(state_path.read_text(encoding="utf-8"))
                 self.load_dev_state(data)
             except Exception:
                 pass

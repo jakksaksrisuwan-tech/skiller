@@ -44,7 +44,7 @@ class Store:
     def load(self) -> None:
         if not self.path.exists():
             return
-        data = json.loads(self.path.read_text())
+        data = json.loads(self.path.read_text(encoding="utf-8"))
         self.skills = {
             k: SkillStat(**v) for k, v in data.get("skills", {}).items()
         }
@@ -89,7 +89,7 @@ class Store:
             "total_pool_clears": self.total_pool_clears,
         }
         tmp = self.path.with_suffix(".tmp")
-        tmp.write_text(json.dumps(data, indent=2))
+        tmp.write_text(json.dumps(data, indent=2), encoding="utf-8")
         os.replace(tmp, self.path)
 
     def record_typing(

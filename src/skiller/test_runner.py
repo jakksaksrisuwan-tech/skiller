@@ -62,7 +62,7 @@ def run_pytest(task_dir: Path, test_files: list[str], timeout: int = 30) -> Test
     duration = 0.0
     if rep_path.exists():
         try:
-            data = json.loads(rep_path.read_text())
+            data = json.loads(rep_path.read_text(encoding="utf-8"))
             summary = data.get("summary", {})
             passed = summary.get("passed", 0)
             failed = summary.get("failed", 0)

@@ -153,7 +153,7 @@ def run() -> None:
     # The mixin reads from the path passed to setup_hot_reload (`.dev_state.json`).
     # If user passes --snapshot pointing elsewhere, copy to that path.
     if args.snapshot and args.snapshot.exists() and args.snapshot != Path(".dev_state.json"):
-        Path(".dev_state.json").write_text(args.snapshot.read_text())
+        Path(".dev_state.json").write_text(args.snapshot.read_text(encoding="utf-8"))
     SkillerApp().run()
 
 

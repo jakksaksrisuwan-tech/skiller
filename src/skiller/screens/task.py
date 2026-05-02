@@ -30,7 +30,7 @@ class TaskScreen(Screen):
     def __init__(self, task_dir: Path) -> None:
         super().__init__()
         self.task_dir = Path(task_dir).resolve()
-        self.manifest = yaml.safe_load((self.task_dir / "task.yaml").read_text())
+        self.manifest = yaml.safe_load((self.task_dir / "task.yaml").read_text(encoding="utf-8"))
         self.solution_path = self.task_dir / "solution.py"
         self.last_result: TestResult | None = None
         self.submitted = False
@@ -44,7 +44,7 @@ class TaskScreen(Screen):
             StopwatchLabel("⏱  00:00", id="task-watch"),
             Horizontal(
                 Vertical(
-                    Markdown((self.task_dir / "prompt.md").read_text(), id="prompt-md"),
+                    Markdown((self.task_dir / "prompt.md").read_text(encoding="utf-8"), id="prompt-md"),
                     id="prompt-pane",
                 ),
                 Vertical(
