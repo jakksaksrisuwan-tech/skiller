@@ -75,7 +75,7 @@ Keybr-style structure-driven typing with adaptive difficulty.
    ↳ memoise expensive pure function         ← description of done line
 ╭──────────────────────────────────────╮     _   _    _
 │   f'{pi:8.3f}'                       │    | |  _|  |_   ← LCD: rolling avg wpm
-╰──────────────────────────────────────╯    |_|   _|  _|
+╰──────────────────────────────────────╯    |_|  _|   _|
    re.findall(r'\b\w+\b', text)              ← upcoming queue (dim)
    sum(x * x for x in nums)
    ...
