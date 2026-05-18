@@ -110,9 +110,21 @@ def main() -> None:
     # daemon: detects natural child exit (user pressed q) and exits supervisor
     threading.Thread(target=_monitor_natural_exit, daemon=True).start()
 
+    def _is_relevant(p: str) -> bool:
+        path = Path(p)
+        if path.suffix not in exts:
+            return False
+        # User-edited task files (solution.py saved by the editor on every
+        # Ctrl-T / Ctrl-G) live under content/python_tasks. They are runtime
+        # data, not source — don't trigger a respawn on them.
+        parts = path.parts
+        if "python_tasks" in parts and path.suffix == ".py":
+            return False
+        return True
+
     try:
         for changes in watch(*paths, recursive=True, debounce=args.debounce, step=200):
-            relevant = [p for _, p in changes if Path(p).suffix in exts]
+            relevant = [p for _, p in changes if _is_relevant(p)]
             if not relevant:
                 continue
             print(f"[dev] change: {relevant[0]} → restart", file=sys.stderr, flush=True)
@@ -129,7 +141,7 @@ def main() -> None:
                     file=sys.stderr, flush=True,
                 )
                 for next_changes in watch(*paths, recursive=True, debounce=args.debounce, step=200):
-                    if any(Path(p).suffix in exts for _, p in next_changes):
+                    if any(_is_relevant(p) for _, p in next_changes):
                         spawn_history.clear()
                         break
 

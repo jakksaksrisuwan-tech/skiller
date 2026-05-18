@@ -46,6 +46,15 @@ class MenuScreen(Screen):
         )
         yield Footer()
 
+    def dev_state(self) -> dict:
+        try:
+            lv = self.query_one("#menu", ListView)
+        except Exception:
+            return {}
+        idx = lv.index if lv.index is not None else 0
+        key = MENU[idx][0] if 0 <= idx < len(MENU) else None
+        return {"menu_index": idx, "menu_key": key}
+
     def on_list_view_selected(self, event: ListView.Selected) -> None:
         if event.item.id is None:
             return

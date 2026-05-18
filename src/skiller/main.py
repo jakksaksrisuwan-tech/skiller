@@ -5,7 +5,9 @@ from pathlib import Path
 from typing import Any
 
 from textual.app import App
+from textual.binding import Binding
 
+from . import _probe
 from .hot_reload import HotReloadable
 from .screens.mcq import MCQScreen
 from .screens.menu import MenuScreen
@@ -45,11 +47,13 @@ class SkillerApp(HotReloadable, App):
     #task-box { padding: 1 2; height: 1fr; }
     #task-meta { color: $accent; height: auto; }
     #task-watch { color: $warning; height: 1; }
-    #task-split { height: 1fr; }
+    #task-split { height: 2fr; }
     #prompt-pane { width: 50%; height: 1fr; padding: 0 2 0 0; }
-    #output-pane { width: 50%; height: 1fr; padding: 0 0 0 1; }
-    #output-title { height: auto; padding-bottom: 1; }
-    #output { height: 1fr; padding: 0; }
+    #editor-pane { width: 50%; height: 1fr; padding: 0 0 0 1; }
+    #output-title { height: auto; padding: 1 0 0 0; }
+    #output-scroll { height: 1fr; min-height: 5; }
+    #output { height: auto; padding: 0; }
+    #editor { height: 1fr; min-height: 8; border: round $accent; }
     #prompt-md { height: 1fr; }
     #typing-box { padding: 2 4; height: 1fr; }
     #typing-top { height: 3; }
@@ -64,26 +68,29 @@ class SkillerApp(HotReloadable, App):
     """
     TITLE = "skiller"
 
+    BINDINGS = [
+        Binding("ctrl+y", "dump_state", "Probe", show=False, priority=True),
+    ]
+
     def __init__(self) -> None:
         super().__init__()
         self.store = Store()
         self._pending_route: str | None = None
+        self._pending_payload: dict[str, Any] = {}
 
-    # ---- hot-reload state ----
+    # ---- driver-facing live probe ----
+
+    def action_dump_state(self) -> None:
+        try:
+            _probe.write(_probe.collect(self))
+            _probe.capture_screen()
+        except Exception as e:
+            self.notify(f"probe failed: {e!r}", severity="error")
+
+    # ---- hot-reload state (shares schema with the live probe) ----
 
     def save_dev_state(self) -> dict[str, Any]:
-        """Snapshot which screen is open + lightweight cursor state."""
-        screen = self.screen.__class__.__name__ if self.screen else None
-        snap: dict[str, Any] = {"screen": screen}
-        if screen == "MCQScreen":
-            mcq: MCQScreen = self.screen  # type: ignore[assignment]
-            snap["mcq"] = {
-                "category": mcq.category,
-                "n": mcq.n,
-                "idx": mcq.idx,
-                "correct_count": mcq.correct_count,
-            }
-        return snap
+        return _probe.collect(self)
 
     def load_dev_state(self, state: dict[str, Any]) -> None:
         # remember; apply after on_mount has pushed default screen
@@ -105,13 +112,12 @@ class SkillerApp(HotReloadable, App):
         if not self._pending_route:
             return
         route = self._pending_route
-        payload = getattr(self, "_pending_payload", {}) or {}
+        payload = self._pending_payload or {}
         self._pending_route = None
         if route == "MCQScreen":
-            mcq = payload.get("mcq", {})
-            cat = mcq.get("category")
+            cat = payload.get("category")
             if cat:
-                self.push_screen(MCQScreen(category=cat, n=mcq.get("n", 25)))
+                self.push_screen(MCQScreen(category=cat, n=payload.get("n", 25)))
         elif route == "StatsScreen":
             self.push_screen(StatsScreen())
 

@@ -42,5 +42,6 @@ Output: `{"fruit": 17, "veg": 3}`
 - A `defaultdict(int)` makes summing trivial.
 - `sorted(d.items(), key=lambda kv: (-kv[1], kv[0]))` gives count-desc + alpha-asc.
 
-Press `e` to edit `solution.py` (vim), `t` to run visible tests, `s` to submit
-(visible + hidden). The screen tracks both target times automatically.
+Edit `solution.py` in the editor pane. **ctrl+s** save · **ctrl+t** run visible
+tests · **ctrl+g** submit (visible + hidden) · **esc** back. The screen tracks
+both target times automatically.

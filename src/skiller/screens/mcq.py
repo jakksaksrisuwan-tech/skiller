@@ -59,6 +59,16 @@ class MCQScreen(Screen):
         # distractors when only a handful are freeforms).
         self._distractor_pool: list[Freeform] = []
 
+    def dev_state(self) -> dict:
+        return {
+            "category": self.category,
+            "n": self.n,
+            "idx": self.idx,
+            "correct_count": self.correct_count,
+            "state": self.state,
+            "total": len(self.items),
+        }
+
     def compose(self) -> ComposeResult:
         yield Header()
         yield Vertical(

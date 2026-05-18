@@ -44,3 +44,6 @@ s.run_order()   # -> raises CycleError
 
 Hidden tests cover: alphabetical tie-breaking, implicit deps, idempotent re-add,
 multi-component graphs, and self-dependency cycles (`add("x", ["x"])`).
+
+Edit `solution.py` in the editor pane. **ctrl+s** save · **ctrl+t** run visible
+tests · **ctrl+g** submit (visible + hidden) · **esc** back.

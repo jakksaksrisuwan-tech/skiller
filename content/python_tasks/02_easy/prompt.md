@@ -42,3 +42,6 @@ parse_syslog(text) == {
 Empty input returns `{}`. Levels with no entries are not present in the result.
 
 Hidden tests cover edge cases: blank lines, mixed levels, weird whitespace.
+
+Edit `solution.py` in the editor pane. **ctrl+s** save · **ctrl+t** run visible
+tests · **ctrl+g** submit (visible + hidden) · **esc** back.

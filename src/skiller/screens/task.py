@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import os
-import subprocess
 import time
 from pathlib import Path
 
@@ -9,9 +7,9 @@ import yaml
 
 from textual.app import ComposeResult
 from textual.binding import Binding
-from textual.containers import Horizontal, Vertical
+from textual.containers import Horizontal, Vertical, VerticalScroll
 from textual.screen import Screen
-from textual.widgets import Footer, Header, Markdown, Static
+from textual.widgets import Footer, Header, Markdown, Static, TextArea
 
 from ..models import Attempt
 from ..test_runner import TestResult, run_pytest
@@ -20,11 +18,18 @@ from ..ui import StopwatchLabel
 
 class TaskScreen(Screen):
     BINDINGS = [
-        Binding("e", "edit", "Edit (vim)"),
-        Binding("t", "run_visible", "Test (visible)"),
-        Binding("s", "submit", "Submit (visible+hidden)"),
-        Binding("escape", "back", "Back"),
-        Binding("q", "back", "Quit", show=False),
+        Binding("ctrl+s", "save", "Save", priority=True),
+        Binding("ctrl+t", "run_visible", "Test (visible)", priority=True),
+        Binding("ctrl+g", "submit", "Submit (visible+hidden)", priority=True),
+        Binding("ctrl+f", "focus_editor", "Edit", show=False),
+        Binding("escape", "back", "Back", priority=True),
+        Binding("ctrl+q", "back", "Quit", show=False),
+        Binding("pageup", "scroll_output('page_up')", "Scroll output ↑", priority=True),
+        Binding("pagedown", "scroll_output('page_down')", "Scroll output ↓", priority=True),
+        Binding("ctrl+up", "scroll_output('up')", "Output line ↑", show=False, priority=True),
+        Binding("ctrl+down", "scroll_output('down')", "Output line ↓", show=False, priority=True),
+        Binding("f5", "resize_split(5)", "wider prompt", priority=True),
+        Binding("f6", "resize_split(-5)", "wider editor", priority=True),
     ]
 
     def __init__(self, task_dir: Path) -> None:
@@ -36,24 +41,82 @@ class TaskScreen(Screen):
         self.submitted = False
         self.first_pass_recorded = False
         self.started: float = 0.0
+        # Probe-visible mirrors of #output-title / #output (Static.renderable
+        # isn't reliably introspectable across Textual versions).
+        self._output_title_text: str = ""
+        self._output_text: str = ""
+        self._prompt_pct: int = 50  # split ratio, adjustable via F5/F6
+        self._initial_solution = (
+            self.solution_path.read_text(encoding="utf-8")
+            if self.solution_path.exists() else ""
+        )
+
+    def dev_state(self) -> dict:
+        out: dict = {
+            "task_dir": str(self.task_dir),
+            "task_id": self.task_dir.name,
+            "submitted": self.submitted,
+            "started": self.started > 0,
+        }
+        try:
+            ed = self.query_one("#editor", TextArea)
+            out["editor_text"] = ed.text
+            out["editor_chars"] = len(ed.text)
+        except Exception:
+            out["editor_text"] = None
+            out["editor_chars"] = None
+        out["output_title"] = self._output_title_text
+        out["output_text"] = self._output_text
+        if self.last_result is not None:
+            r = self.last_result
+            out["last_result"] = {
+                "passed": r.passed,
+                "failed": r.failed,
+                "errors": r.errors,
+                "duration": r.duration,
+                "ok": r.all_green,
+            }
+        return out
+
+    @staticmethod
+    def _make_editor(text: str) -> TextArea:
+        """Build a TextArea, degrading gracefully if syntax highlighting deps
+        (`textual[syntax]` / tree-sitter) aren't installed."""
+        # 1) Best: code_editor with python highlighting.
+        try:
+            return TextArea.code_editor(text, language="python", id="editor")
+        except Exception:
+            pass
+        # 2) code_editor without language (line numbers + indent behaviour).
+        try:
+            return TextArea.code_editor(text, id="editor")
+        except Exception:
+            pass
+        # 3) Plain TextArea — works on any Textual version.
+        return TextArea(text, id="editor")
 
     def compose(self) -> ComposeResult:
         yield Header()
+        editor = self._make_editor(self._initial_solution)
         yield Vertical(
             Static(" ", id="task-meta"),
             StopwatchLabel("⏱  00:00", id="task-watch"),
             Horizontal(
                 Vertical(
-                    Markdown((self.task_dir / "prompt.md").read_text(encoding="utf-8"), id="prompt-md"),
+                    Markdown(
+                        (self.task_dir / "prompt.md").read_text(encoding="utf-8"),
+                        id="prompt-md",
+                    ),
                     id="prompt-pane",
                 ),
                 Vertical(
-                    Static(" ", id="output-title"),
-                    Static(" ", id="output"),
-                    id="output-pane",
+                    editor,
+                    id="editor-pane",
                 ),
                 id="task-split",
             ),
+            Static(" ", id="output-title"),
+            VerticalScroll(Static(" ", id="output"), id="output-scroll"),
             id="task-box",
         )
         yield Footer()
@@ -75,28 +138,36 @@ class TaskScreen(Screen):
             f"[b]{self.manifest['title']}[/b]   "
             f"[dim]{target_str}[/dim]"
         )
-        self.query_one("#output-title", Static).update(
-            "[dim]Press [b]e[/b] to edit, [b]t[/b] to run visible tests, "
-            "[b]s[/b] to submit (visible + hidden).[/dim]"
+        self._set_output_title(
+            "[dim][b]ctrl+s[/b] save · [b]ctrl+t[/b] run visible · "
+            "[b]ctrl+g[/b] submit · [b]esc[/b] back[/dim]"
         )
-        self.query_one("#output", Static).update(
-            f"[b]solution.py[/b] — {self.solution_path}\n"
-            f"[b]editor[/b] — {os.environ.get('EDITOR', 'vim')}"
-        )
+        self._set_output(f"[b]solution.py[/b] — {self.solution_path}")
+        self.query_one("#editor", TextArea).focus()
+
+    def _set_output_title(self, text: str) -> None:
+        self._output_title_text = text
+        self.query_one("#output-title", Static).update(text)
+
+    def _set_output(self, text: str) -> None:
+        self._output_text = text
+        self.query_one("#output", Static).update(text)
 
     # ---- actions ----
 
-    def action_edit(self) -> None:
-        editor = os.environ.get("EDITOR", "vim")
-        with self.app.suspend():  # hands TTY back; restored after editor exits
-            try:
-                subprocess.run([editor, str(self.solution_path)], check=False)
-            except FileNotFoundError:
-                pass
-        self.refresh()
-        self.query_one("#output-title", Static).update("[dim]Returned from editor.[/dim]")
+    def _save_editor(self) -> None:
+        text = self.query_one("#editor", TextArea).text
+        self.solution_path.write_text(text, encoding="utf-8")
+
+    def action_save(self) -> None:
+        self._save_editor()
+        self.notify("Saved.", timeout=1.2)
+
+    def action_focus_editor(self) -> None:
+        self.query_one("#editor", TextArea).focus()
 
     def action_run_visible(self) -> None:
+        self._save_editor()
         result = self._run(self.manifest.get("visible_tests", []), label="visible")
         if (
             result is not None
@@ -106,13 +177,12 @@ class TaskScreen(Screen):
             self._record_milestone("task_first_pass", "first_pass")
 
     def action_submit(self) -> None:
+        self._save_editor()
         all_files = list(self.manifest.get("visible_tests", [])) + list(
             self.manifest.get("hidden_tests", [])
         )
         if not all_files:
-            self.query_one("#output-title", Static).update(
-                "[yellow]No tests defined.[/yellow]"
-            )
+            self._set_output_title("[yellow]No tests defined.[/yellow]")
             return
         result = self._run(all_files, label="submit")
         if result is None:
@@ -190,13 +260,9 @@ class TaskScreen(Screen):
 
     def _run(self, files: list[str], label: str) -> TestResult | None:
         if not files:
-            self.query_one("#output-title", Static).update(
-                "[yellow]No tests to run.[/yellow]"
-            )
+            self._set_output_title("[yellow]No tests to run.[/yellow]")
             return None
-        self.query_one("#output-title", Static).update(
-            f"[b]Running {label}…[/b]"
-        )
+        self._set_output_title(f"[b]Running {label}…[/b]")
         result = run_pytest(self.task_dir, files)
         self.last_result = result
         self._render_result(result, label)
@@ -212,7 +278,7 @@ class TaskScreen(Screen):
         )
         if r.all_green:
             head += "   [green]✓ all green[/green]"
-        self.query_one("#output-title", Static).update(head)
+        self._set_output_title(head)
 
         if r.failures:
             blocks = []
@@ -224,11 +290,40 @@ class TaskScreen(Screen):
             body = "\n\n".join(blocks)
             if len(r.failures) > 5:
                 body += f"\n\n[dim]…and {len(r.failures) - 5} more[/dim]"
-            self.query_one("#output", Static).update(body)
+            self._set_output(body)
         else:
-            tail = (r.raw_stdout or "").strip().splitlines()
+            tail = [
+                ln for ln in (r.raw_stdout or "").splitlines()
+                if not ln.startswith("__SKILLER_RESULT__")
+            ]
+            # trim trailing blanks
+            while tail and not tail[-1].strip():
+                tail.pop()
             tail_text = "\n".join(tail[-15:]) if tail else "[dim](no output)[/dim]"
-            self.query_one("#output", Static).update(tail_text)
+            self._set_output(tail_text)
+
+    def action_resize_split(self, delta: int) -> None:
+        # delta < 0: shrink prompt (editor grows). Clamp to [20, 80].
+        new_pct = max(20, min(80, self._prompt_pct + delta))
+        if new_pct == self._prompt_pct:
+            return
+        self._prompt_pct = new_pct
+        self.query_one("#prompt-pane").styles.width = f"{new_pct}%"
+        self.query_one("#editor-pane").styles.width = f"{100 - new_pct}%"
+
+    def action_scroll_output(self, mode: str) -> None:
+        try:
+            sv = self.query_one("#output-scroll", VerticalScroll)
+        except Exception:
+            return
+        if mode == "page_up":
+            sv.scroll_page_up(animate=False)
+        elif mode == "page_down":
+            sv.scroll_page_down(animate=False)
+        elif mode == "up":
+            sv.scroll_up(animate=False)
+        elif mode == "down":
+            sv.scroll_down(animate=False)
 
     def action_back(self) -> None:
         self.app.pop_screen()

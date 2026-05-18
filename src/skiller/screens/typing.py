@@ -91,6 +91,18 @@ class TypingScreen(Screen):
         self._drill_cursor: int = 0  # round-robin index for correction drills
         self.show_scoreboard: bool = False  # collapsed by default
 
+    def dev_state(self) -> dict:
+        return {
+            "language": self.language,
+            "target_len": len(self.target),
+            "cursor": self.cursor,
+            "errors": self.errors_this_run,
+            "corrections": self.corrections_this_run,
+            "completions": self.session_completions,
+            "correction_mode": self.correction_mode,
+            "scoreboard_open": self.show_scoreboard,
+        }
+
     def compose(self) -> ComposeResult:
         yield Header()
         yield Vertical(

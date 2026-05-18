@@ -13,4 +13,4 @@ sum_even([1, 3, 5])     # -> 0
 sum_even([-2, -1, 0])   # -> -2
 ```
 
-Edit `solution.py` with `e` (vim) — save & quit (`:wq`) — then `t` to run tests.
+Edit `solution.py` in the editor pane. **ctrl+s** save · **ctrl+t** run tests · **esc** back.
