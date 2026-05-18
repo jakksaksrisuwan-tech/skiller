@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import os
+import subprocess
+import sys
 import time
 from pathlib import Path
 
@@ -20,6 +23,7 @@ class TaskScreen(Screen):
     BINDINGS = [
         Binding("ctrl+s", "save", "Save", priority=True),
         Binding("ctrl+t", "run_visible", "Test (visible)", priority=True),
+        Binding("ctrl+r", "run_main", "Run solution.py", priority=True),
         Binding("ctrl+g", "submit", "Submit (visible+hidden)", priority=True),
         Binding("ctrl+f", "focus_editor", "Edit", show=False),
         Binding("escape", "back", "Back", priority=True),
@@ -140,7 +144,8 @@ class TaskScreen(Screen):
         )
         self._set_output_title(
             "[dim][b]ctrl+s[/b] save · [b]ctrl+t[/b] run visible · "
-            "[b]ctrl+g[/b] submit · [b]esc[/b] back[/dim]"
+            "[b]ctrl+r[/b] run solution.py · [b]ctrl+g[/b] submit · "
+            "[b]esc[/b] back[/dim]"
         )
         self._set_output(f"[b]solution.py[/b] — {self.solution_path}")
         self.query_one("#editor", TextArea).focus()
@@ -165,6 +170,45 @@ class TaskScreen(Screen):
 
     def action_focus_editor(self) -> None:
         self.query_one("#editor", TextArea).focus()
+
+    def action_run_main(self) -> None:
+        self._save_editor()
+        self._set_output_title("[b]Running solution.py…[/b]")
+        env = os.environ.copy()
+        env["PYTHONPATH"] = str(self.task_dir) + os.pathsep + env.get("PYTHONPATH", "")
+        env.setdefault("PYTHONDONTWRITEBYTECODE", "1")
+        try:
+            proc = subprocess.run(
+                [sys.executable, str(self.solution_path)],
+                cwd=self.task_dir, env=env, capture_output=True, text=True,
+                timeout=10,
+            )
+            rc = proc.returncode
+            stdout, stderr = proc.stdout, proc.stderr
+        except subprocess.TimeoutExpired as e:
+            rc = -1
+            stdout = e.stdout.decode() if isinstance(e.stdout, bytes) else (e.stdout or "")
+            stderr = (
+                (e.stderr.decode() if isinstance(e.stderr, bytes) else (e.stderr or ""))
+                + "\n[timeout after 10s]"
+            )
+        self._render_run_main(rc, stdout, stderr)
+
+    def _render_run_main(self, rc: int, stdout: str, stderr: str) -> None:
+        verdict = "[green]exit 0[/green]" if rc == 0 else f"[red]exit {rc}[/red]"
+        self._set_output_title(f"[b]run solution.py[/b]  {verdict}")
+        sections: list[str] = []
+        out_lines = [ln for ln in stdout.splitlines() if True]
+        while out_lines and not out_lines[-1].strip():
+            out_lines.pop()
+        err_lines = [ln for ln in stderr.splitlines() if ln.strip()]
+        if out_lines:
+            sections.append("[dim]── stdout ──[/dim]\n" + "\n".join(out_lines[-30:]))
+        if err_lines:
+            sections.append("[dim]── stderr ──[/dim]\n" + "\n".join(err_lines[-30:]))
+        if not sections:
+            sections.append("[dim](no output)[/dim]")
+        self._set_output("\n\n".join(sections))
 
     def action_run_visible(self) -> None:
         self._save_editor()
@@ -280,6 +324,15 @@ class TaskScreen(Screen):
             head += "   [green]✓ all green[/green]"
         self._set_output_title(head)
 
+        stdout_tail = [
+            ln for ln in (r.raw_stdout or "").splitlines()
+            if not ln.startswith("__SKILLER_RESULT__")
+        ]
+        while stdout_tail and not stdout_tail[-1].strip():
+            stdout_tail.pop()
+        stderr_tail = [ln for ln in (r.raw_stderr or "").splitlines() if ln.strip()]
+
+        sections: list[str] = []
         if r.failures:
             blocks = []
             for f in r.failures[:5]:
@@ -290,17 +343,14 @@ class TaskScreen(Screen):
             body = "\n\n".join(blocks)
             if len(r.failures) > 5:
                 body += f"\n\n[dim]…and {len(r.failures) - 5} more[/dim]"
-            self._set_output(body)
-        else:
-            tail = [
-                ln for ln in (r.raw_stdout or "").splitlines()
-                if not ln.startswith("__SKILLER_RESULT__")
-            ]
-            # trim trailing blanks
-            while tail and not tail[-1].strip():
-                tail.pop()
-            tail_text = "\n".join(tail[-15:]) if tail else "[dim](no output)[/dim]"
-            self._set_output(tail_text)
+            sections.append(body)
+        if stdout_tail:
+            sections.append("[dim]── stdout ──[/dim]\n" + "\n".join(stdout_tail[-15:]))
+        if stderr_tail:
+            sections.append("[dim]── stderr ──[/dim]\n" + "\n".join(stderr_tail[-15:]))
+        if not sections:
+            sections.append("[dim](no output)[/dim]")
+        self._set_output("\n\n".join(sections))
 
     def action_resize_split(self, delta: int) -> None:
         # delta < 0: shrink prompt (editor grows). Clamp to [20, 80].
