@@ -1,9 +1,9 @@
 # skiller
 
 Terminal app to prep for DevSkiller-style technical exercises:
-**Linux MCQ · Python MCQ · Python coding tasks · Typing drills (Python + Linux)**
-with adaptive difficulty, SM-2 spaced repetition, bigram struggle tracking,
-and 47 achievements.
+**Linux MCQ · Python MCQ · Python coding tasks · Typing drills
+(Python · Linux · NumPy · pandas)** with adaptive difficulty, SM-2 spaced
+repetition, bigram struggle tracking, and 47 achievements.
 
 ```
 $ ./start.sh
@@ -34,8 +34,9 @@ interleave by SM-2 weakness. False-confidence (sure but wrong) is the
 hardest grade penalty.
 
 ### Python Coding Tasks
-4 tasks. Vim-launching editor (`e` suspends Textual), pytest runner with
-visible + hidden test suites.
+4 tasks. **Integrated editor** (Textual TextArea with Python syntax
+highlighting via tree-sitter, monokai theme) + stdlib-only test driver — no
+external editor, no pytest install required.
 
 | Task | Difficulty | Targets |
 |---|---|---|
@@ -44,18 +45,43 @@ visible + hidden test suites.
 | `csv_aggregate` | medium | **20 min first pass · 40 min complete** |
 | `TaskScheduler` | hard (~40 min) | topo-sort with cycle detection |
 
-Press `e` to edit, `t` to run visible tests, `s` to submit (visible + hidden).
-First-pass and complete times recorded vs per-task targets; stats screen
-shows your best (fastest) milestone per task.
+Keys (all `priority=True` so the editor never swallows them):
 
-### Typing Drills (Python + Linux)
+```
+ctrl+s    save solution.py
+ctrl+t    run visible tests
+ctrl+r    run solution.py as __main__ (debug with print(), or run unittest.main())
+ctrl+g    submit (visible + hidden tests)
+esc       back to menu
+```
+
+Output panel shows pass/fail counts, failure tracebacks, **and** captured
+stdout/stderr tails — so `print()` debugging stays visible even when tests
+fail. First-pass and complete times recorded vs per-task targets; stats
+screen shows your best (fastest) milestone per task.
+
+### Typing Drills (Python · Linux · NumPy · pandas)
 Keybr-style structure-driven typing with adaptive difficulty.
 
-- **285 snippets** total — 93 Python (23 structures) + **192 Linux**
-  (64 structures: `find`, `grep`, `awk`, `chmod`, `tar`, `ssh`, `systemctl`,
-  `apt`, `git rebase -i`, `git bisect`, `tmux`, `fzf`, `rg`/`fd`/`bat`,
-  `lsof`, `pmap`, `/proc`, `gdb -p`, `py-spy`, `perf record`, shell loops,
-  pipes, redirects, parameter expansion, …)
+- **592 snippets** total across four isolated pools:
+  - **93 Python** (23 structures) — comprehensions, lambdas, context managers,
+    f-strings, walrus, decorators, …
+  - **192 Linux** (64 structures) — `find`, `grep`, `awk`, `chmod`, `tar`,
+    `ssh`, `systemctl`, `apt`, `git rebase -i`, `git bisect`, `tmux`, `fzf`,
+    `rg`/`fd`/`bat`, `lsof`, `pmap`, `/proc`, `gdb -p`, `py-spy`,
+    `perf record`, shell loops, pipes, redirects, parameter expansion, …
+  - **143 NumPy** (143 structures) — creation, shape/reshape, indexing +
+    masking, stacking/splitting, arithmetic + broadcasting, reductions,
+    matrix/linalg (`matmul`, `det`, `inv`, `solve`, `lstsq`, `eig`/`eigh`,
+    `svd`, `qr`, `cholesky`, `kron`, `einsum`), dtype, view-vs-copy,
+    sort/unique/searchsorted, Generator random, npy/npz/loadtxt i/o
+  - **164 pandas** (164 structures) — i/o (csv/parquet/json/excel/sql),
+    Series/DataFrame creation, selection (loc/iloc/at/iat/query/where/mask),
+    missing data, duplicates, dtype convert, apply/map/pipe/assign,
+    `.str`/`.dt` accessors, sorting + `nlargest`, MultiIndex + `xs`,
+    groupby (`transform`/`filter`/`apply`/named-agg), pivot/melt/stack,
+    concat/merge (inner/left/outer/`merge_asof`)/join,
+    rolling/expanding/ewm/resample/ohlc, `cut`/`qcut` + categorical
 - Picker weights snippets by *structure-weakness* — your slow structures
   surface more often
 - Difficulty tier `1/2/3` filters by lifetime average WPM
@@ -200,9 +226,8 @@ child snapshots state to `.dev_state.json` → supervisor respawns with
   exact screen you were on. The drill itself is unaffected.
 - If PowerShell blocks `start.ps1`, run once:
   `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`
-- Vim is not bundled. `git task` mode (the `e` key) suspends to your
-  `$EDITOR`. Set it: `$env:EDITOR = "nvim"` (or `code --wait`, `vim`, …)
-  before starting `.\start.ps1`.
+- The coding-task editor is integrated (Textual TextArea) — no external
+  `$EDITOR` is launched, nothing to configure.
 
 ## Offline
 
@@ -229,6 +254,8 @@ sudo lsof -i -P -n -p $(pgrep -f skiller.main)   # empty = no sockets open
 │   ├── python_freeform.yaml      # 12 dropdown
 │   ├── typing_snippets.yaml      # 93 Python typing
 │   ├── typing_linux.yaml         # 192 Linux typing
+│   ├── typing_numpy.yaml         # 143 NumPy matrix-manipulation typing
+│   ├── typing_pandas.yaml        # 164 pandas DataFrame-ops typing
 │   └── python_tasks/
 │       ├── 01_practice/
 │       ├── 02_easy/
@@ -240,13 +267,14 @@ sudo lsof -i -P -n -p $(pgrep -f skiller.main)   # empty = no sockets open
     ├── store.py          # JSON-persisted .skiller_state.json + helpers
     ├── content.py        # YAML loaders, weighted samplers, tier filter
     ├── achievements.py   # 47 declarative rules + check_unlocks()
-    ├── test_runner.py    # pytest --json-report wrapper
+    ├── test_runner.py    # stdlib-only test driver subprocess wrapper
+    ├── _test_driver.py   # collects test_* funcs, runs them, emits JSON
     ├── hot_reload.py     # HotReloadable mixin (SIGTERM-driven snapshot)
     ├── ui.py             # progress_bar, StopwatchLabel
     └── screens/
         ├── menu.py
         ├── mcq.py        # MCQ + freeform-as-dropdown, confidence, SM-2
-        ├── task.py       # vim-suspend + pytest output + milestone tracking
+        ├── task.py       # integrated TextArea editor + test driver + run-main
         ├── typing.py     # keybr-style drill, LCD, scoreboard, F1/F2/F3/F4
         ├── stats.py      # tabular proficiency overview
         └── achievements.py  # F3 panel, locked names hidden
