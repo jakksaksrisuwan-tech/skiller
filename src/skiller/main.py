@@ -142,6 +142,12 @@ class SkillerApp(HotReloadable, App):
         if key == "typing_linux":
             self.push_screen(TypingScreen(language="linux"))
             return
+        if key == "typing_numpy":
+            self.push_screen(TypingScreen(language="numpy"))
+            return
+        if key == "typing_pandas":
+            self.push_screen(TypingScreen(language="pandas"))
+            return
         if key in TASK_DIRS:
             d = TASK_DIRS[key]
             if not d.exists():

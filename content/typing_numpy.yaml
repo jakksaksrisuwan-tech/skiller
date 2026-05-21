@@ -1,0 +1,1027 @@
+snippets:
+  # ── creation ─────────────────────────────────────────────────────
+  - id: tn-create-array
+    structure: np_array
+    language: numpy
+    difficulty: 1
+    text: "a = np.array([1, 2, 3])"
+    description: "1-D array from a list."
+    tags: [numpy, creation]
+  - id: tn-create-array2d
+    structure: np_array2d
+    language: numpy
+    difficulty: 2
+    text: "M = np.array([[1, 2], [3, 4]])"
+    description: "2-D array (matrix) from nested lists."
+    tags: [numpy, creation, matrix]
+  - id: tn-zeros
+    structure: np_zeros
+    language: numpy
+    difficulty: 1
+    text: "Z = np.zeros((3, 4))"
+    description: "Float zeros of given shape."
+    tags: [numpy, creation]
+  - id: tn-ones
+    structure: np_ones
+    language: numpy
+    difficulty: 1
+    text: "O = np.ones((2, 3), dtype=int)"
+    description: "Int ones of given shape."
+    tags: [numpy, creation, dtype]
+  - id: tn-empty
+    structure: np_empty
+    language: numpy
+    difficulty: 1
+    text: "E = np.empty((2, 2))"
+    description: "Uninitialized buffer — fastest allocation."
+    tags: [numpy, creation]
+  - id: tn-full
+    structure: np_full
+    language: numpy
+    difficulty: 2
+    text: "F = np.full((3, 3), fill_value=7)"
+    description: "Fill an array with a constant value."
+    tags: [numpy, creation]
+  - id: tn-eye
+    structure: np_eye
+    language: numpy
+    difficulty: 1
+    text: "I = np.eye(4)"
+    description: "Identity matrix of size n."
+    tags: [numpy, creation, linalg]
+  - id: tn-identity
+    structure: np_identity
+    language: numpy
+    difficulty: 1
+    text: "I = np.identity(3)"
+    description: "Square identity matrix."
+    tags: [numpy, creation, linalg]
+  - id: tn-arange
+    structure: np_arange
+    language: numpy
+    difficulty: 1
+    text: "r = np.arange(0, 10, 2)"
+    description: "Range with step, like Python range but returns ndarray."
+    tags: [numpy, creation]
+  - id: tn-linspace
+    structure: np_linspace
+    language: numpy
+    difficulty: 2
+    text: "x = np.linspace(0, 1, 11)"
+    description: "Evenly spaced floats from start to stop inclusive."
+    tags: [numpy, creation]
+  - id: tn-logspace
+    structure: np_logspace
+    language: numpy
+    difficulty: 3
+    text: "y = np.logspace(-3, 3, num=7)"
+    description: "Evenly spaced on a log scale."
+    tags: [numpy, creation]
+  - id: tn-zeros-like
+    structure: np_zeros_like
+    language: numpy
+    difficulty: 2
+    text: "Z = np.zeros_like(A)"
+    description: "Zeros with shape and dtype of A."
+    tags: [numpy, creation]
+  - id: tn-ones-like
+    structure: np_ones_like
+    language: numpy
+    difficulty: 2
+    text: "O = np.ones_like(A, dtype=float)"
+    description: "Ones matching A's shape, override dtype."
+    tags: [numpy, creation, dtype]
+
+  # ── shape / reshape ──────────────────────────────────────────────
+  - id: tn-shape
+    structure: np_shape
+    language: numpy
+    difficulty: 1
+    text: "rows, cols = A.shape"
+    description: "Shape tuple unpacked."
+    tags: [numpy, shape]
+  - id: tn-ndim
+    structure: np_ndim
+    language: numpy
+    difficulty: 1
+    text: "d = A.ndim"
+    description: "Number of axes."
+    tags: [numpy, shape]
+  - id: tn-size
+    structure: np_size
+    language: numpy
+    difficulty: 1
+    text: "n = A.size"
+    description: "Total element count."
+    tags: [numpy, shape]
+  - id: tn-reshape
+    structure: np_reshape
+    language: numpy
+    difficulty: 2
+    text: "B = A.reshape(2, 3)"
+    description: "Reshape without copying (view if contiguous)."
+    tags: [numpy, shape]
+  - id: tn-reshape-infer
+    structure: np_reshape_infer
+    language: numpy
+    difficulty: 2
+    text: "B = A.reshape(-1, 4)"
+    description: "Infer rows so cols = 4."
+    tags: [numpy, shape]
+  - id: tn-flatten
+    structure: np_flatten
+    language: numpy
+    difficulty: 1
+    text: "v = A.flatten()"
+    description: "1-D copy of all elements."
+    tags: [numpy, shape]
+  - id: tn-ravel
+    structure: np_ravel
+    language: numpy
+    difficulty: 2
+    text: "v = A.ravel()"
+    description: "1-D view (no copy when possible)."
+    tags: [numpy, shape]
+  - id: tn-transpose-attr
+    structure: np_T
+    language: numpy
+    difficulty: 1
+    text: "B = A.T"
+    description: "Transpose attribute."
+    tags: [numpy, shape, matrix]
+  - id: tn-transpose-fn
+    structure: np_transpose
+    language: numpy
+    difficulty: 2
+    text: "B = np.transpose(A, axes=(1, 0, 2))"
+    description: "Reorder axes by permutation."
+    tags: [numpy, shape, matrix]
+  - id: tn-swapaxes
+    structure: np_swapaxes
+    language: numpy
+    difficulty: 3
+    text: "B = np.swapaxes(A, 0, 2)"
+    description: "Swap two axes in place of full transpose."
+    tags: [numpy, shape]
+  - id: tn-moveaxis
+    structure: np_moveaxis
+    language: numpy
+    difficulty: 3
+    text: "B = np.moveaxis(A, source=0, destination=-1)"
+    description: "Move one axis to a new position."
+    tags: [numpy, shape]
+  - id: tn-expand-dims
+    structure: np_expand_dims
+    language: numpy
+    difficulty: 2
+    text: "B = np.expand_dims(v, axis=1)"
+    description: "Insert length-1 axis (e.g. row → column vector)."
+    tags: [numpy, shape, broadcasting]
+  - id: tn-squeeze
+    structure: np_squeeze
+    language: numpy
+    difficulty: 2
+    text: "B = np.squeeze(A, axis=0)"
+    description: "Drop length-1 axes."
+    tags: [numpy, shape]
+  - id: tn-newaxis
+    structure: np_newaxis
+    language: numpy
+    difficulty: 3
+    text: "col = v[:, np.newaxis]"
+    description: "Add new axis via fancy indexing — row → column."
+    tags: [numpy, shape, broadcasting]
+
+  # ── indexing & slicing ───────────────────────────────────────────
+  - id: tn-idx-elem
+    structure: np_idx_elem
+    language: numpy
+    difficulty: 1
+    text: "x = A[0, 0]"
+    description: "Scalar element at (row, col)."
+    tags: [numpy, indexing]
+  - id: tn-idx-row
+    structure: np_idx_row
+    language: numpy
+    difficulty: 1
+    text: "row = A[2]"
+    description: "Single row by index."
+    tags: [numpy, indexing]
+  - id: tn-idx-col
+    structure: np_idx_col
+    language: numpy
+    difficulty: 2
+    text: "col = A[:, 1]"
+    description: "Single column via full-row slice."
+    tags: [numpy, indexing]
+  - id: tn-slice-block
+    structure: np_slice_block
+    language: numpy
+    difficulty: 3
+    text: "sub = A[1:4, 2:5]"
+    description: "Rectangular block slice (view)."
+    tags: [numpy, indexing, slicing]
+  - id: tn-stride
+    structure: np_stride
+    language: numpy
+    difficulty: 3
+    text: "every2 = A[::2, ::2]"
+    description: "Step-2 slicing on both axes."
+    tags: [numpy, indexing, slicing]
+  - id: tn-reverse-rows
+    structure: np_reverse_rows
+    language: numpy
+    difficulty: 2
+    text: "B = A[::-1]"
+    description: "Reverse along axis 0."
+    tags: [numpy, indexing, slicing]
+  - id: tn-fancy-rows
+    structure: np_fancy_rows
+    language: numpy
+    difficulty: 3
+    text: "rows = A[[0, 2, 4]]"
+    description: "Fancy indexing — pick specific rows."
+    tags: [numpy, indexing]
+  - id: tn-fancy-grid
+    structure: np_fancy_grid
+    language: numpy
+    difficulty: 3
+    text: "vals = A[[0, 1], [2, 3]]"
+    description: "Pair-wise fancy indexing — returns elements (0,2) and (1,3)."
+    tags: [numpy, indexing]
+  - id: tn-bool-mask
+    structure: np_bool_mask
+    language: numpy
+    difficulty: 2
+    text: "pos = A[A > 0]"
+    description: "Boolean masking — keep positives."
+    tags: [numpy, indexing, mask]
+  - id: tn-bool-assign
+    structure: np_bool_assign
+    language: numpy
+    difficulty: 3
+    text: "A[A < 0] = 0"
+    description: "In-place clip via mask assignment."
+    tags: [numpy, indexing, mask]
+  - id: tn-take
+    structure: np_take
+    language: numpy
+    difficulty: 3
+    text: "out = np.take(A, [0, 2, 5], axis=0)"
+    description: "Take along an axis by integer indices."
+    tags: [numpy, indexing]
+  - id: tn-put
+    structure: np_put
+    language: numpy
+    difficulty: 3
+    text: "np.put(A, [0, 1, 2], [9, 9, 9])"
+    description: "Write into flat positions in-place."
+    tags: [numpy, indexing]
+  - id: tn-where-cond
+    structure: np_where
+    language: numpy
+    difficulty: 3
+    text: "B = np.where(A > 0, A, 0)"
+    description: "Conditional select — ReLU-style."
+    tags: [numpy, indexing, mask]
+  - id: tn-where-idx
+    structure: np_where_idx
+    language: numpy
+    difficulty: 3
+    text: "rows, cols = np.where(A == 0)"
+    description: "Indices of matching positions."
+    tags: [numpy, indexing, mask]
+  - id: tn-nonzero
+    structure: np_nonzero
+    language: numpy
+    difficulty: 2
+    text: "idx = np.nonzero(v)"
+    description: "Tuple of arrays with nonzero positions per axis."
+    tags: [numpy, indexing, mask]
+  - id: tn-argwhere
+    structure: np_argwhere
+    language: numpy
+    difficulty: 3
+    text: "pts = np.argwhere(A > 5)"
+    description: "Coordinates (one row per match) where condition holds."
+    tags: [numpy, indexing, mask]
+
+  # ── stacking / splitting / concat ────────────────────────────────
+  - id: tn-concat-rows
+    structure: np_concat_rows
+    language: numpy
+    difficulty: 2
+    text: "C = np.concatenate([A, B], axis=0)"
+    description: "Concat along rows (stack vertically)."
+    tags: [numpy, combine]
+  - id: tn-concat-cols
+    structure: np_concat_cols
+    language: numpy
+    difficulty: 2
+    text: "C = np.concatenate([A, B], axis=1)"
+    description: "Concat along cols (stack horizontally)."
+    tags: [numpy, combine]
+  - id: tn-vstack
+    structure: np_vstack
+    language: numpy
+    difficulty: 2
+    text: "C = np.vstack([A, B])"
+    description: "Vertical stack — adds rows."
+    tags: [numpy, combine]
+  - id: tn-hstack
+    structure: np_hstack
+    language: numpy
+    difficulty: 2
+    text: "C = np.hstack([A, B])"
+    description: "Horizontal stack — adds cols."
+    tags: [numpy, combine]
+  - id: tn-dstack
+    structure: np_dstack
+    language: numpy
+    difficulty: 3
+    text: "C = np.dstack([R, G, B])"
+    description: "Depth stack — channels-last image."
+    tags: [numpy, combine]
+  - id: tn-stack-new
+    structure: np_stack
+    language: numpy
+    difficulty: 3
+    text: "C = np.stack([A, B], axis=0)"
+    description: "Stack along a NEW axis (unlike concatenate)."
+    tags: [numpy, combine]
+  - id: tn-split-eq
+    structure: np_split
+    language: numpy
+    difficulty: 3
+    text: "parts = np.split(A, 3, axis=0)"
+    description: "Split into N equal sub-arrays along axis."
+    tags: [numpy, combine]
+  - id: tn-array-split
+    structure: np_array_split
+    language: numpy
+    difficulty: 3
+    text: "parts = np.array_split(A, 4, axis=1)"
+    description: "Like split but tolerates uneven sizes."
+    tags: [numpy, combine]
+  - id: tn-hsplit
+    structure: np_hsplit
+    language: numpy
+    difficulty: 3
+    text: "left, right = np.hsplit(A, [2])"
+    description: "Split columns at given index."
+    tags: [numpy, combine]
+  - id: tn-vsplit
+    structure: np_vsplit
+    language: numpy
+    difficulty: 3
+    text: "top, bot = np.vsplit(A, [3])"
+    description: "Split rows at given index."
+    tags: [numpy, combine]
+  - id: tn-tile
+    structure: np_tile
+    language: numpy
+    difficulty: 3
+    text: "T = np.tile(A, (2, 3))"
+    description: "Repeat the block 2× along rows, 3× along cols."
+    tags: [numpy, combine]
+  - id: tn-repeat
+    structure: np_repeat
+    language: numpy
+    difficulty: 3
+    text: "r = np.repeat(v, 3)"
+    description: "Repeat each element N times."
+    tags: [numpy, combine]
+
+  # ── arithmetic / element-wise ────────────────────────────────────
+  - id: tn-add
+    structure: np_add
+    language: numpy
+    difficulty: 1
+    text: "C = A + B"
+    description: "Element-wise add."
+    tags: [numpy, arithmetic]
+  - id: tn-sub
+    structure: np_sub
+    language: numpy
+    difficulty: 1
+    text: "D = A - B"
+    description: "Element-wise subtract."
+    tags: [numpy, arithmetic]
+  - id: tn-mul-elem
+    structure: np_mul_elem
+    language: numpy
+    difficulty: 1
+    text: "E = A * B"
+    description: "Element-wise multiply — NOT matmul."
+    tags: [numpy, arithmetic]
+  - id: tn-div
+    structure: np_div
+    language: numpy
+    difficulty: 1
+    text: "F = A / B"
+    description: "Element-wise divide (float)."
+    tags: [numpy, arithmetic]
+  - id: tn-floordiv
+    structure: np_floordiv
+    language: numpy
+    difficulty: 2
+    text: "G = A // 2"
+    description: "Element-wise floor divide."
+    tags: [numpy, arithmetic]
+  - id: tn-mod
+    structure: np_mod
+    language: numpy
+    difficulty: 2
+    text: "H = A % 3"
+    description: "Element-wise modulo."
+    tags: [numpy, arithmetic]
+  - id: tn-pow
+    structure: np_pow
+    language: numpy
+    difficulty: 1
+    text: "P = A ** 2"
+    description: "Element-wise power."
+    tags: [numpy, arithmetic]
+  - id: tn-scalar-broadcast
+    structure: np_scalar_bcast
+    language: numpy
+    difficulty: 1
+    text: "Q = A * 0.5 + 1"
+    description: "Scalar broadcast — fused affine."
+    tags: [numpy, arithmetic, broadcasting]
+  - id: tn-clip
+    structure: np_clip
+    language: numpy
+    difficulty: 2
+    text: "C = np.clip(A, 0, 1)"
+    description: "Bound element values to [lo, hi]."
+    tags: [numpy, arithmetic]
+  - id: tn-abs
+    structure: np_abs
+    language: numpy
+    difficulty: 1
+    text: "B = np.abs(A)"
+    description: "Element-wise absolute value."
+    tags: [numpy, arithmetic]
+  - id: tn-sign
+    structure: np_sign
+    language: numpy
+    difficulty: 2
+    text: "S = np.sign(A)"
+    description: "-1 / 0 / +1 per element."
+    tags: [numpy, arithmetic]
+  - id: tn-round
+    structure: np_round
+    language: numpy
+    difficulty: 2
+    text: "R = np.round(A, decimals=3)"
+    description: "Round each element to N decimals."
+    tags: [numpy, arithmetic]
+  - id: tn-floor
+    structure: np_floor
+    language: numpy
+    difficulty: 1
+    text: "F = np.floor(A)"
+    description: "Element-wise floor (toward -inf)."
+    tags: [numpy, arithmetic]
+  - id: tn-ceil
+    structure: np_ceil
+    language: numpy
+    difficulty: 1
+    text: "C = np.ceil(A)"
+    description: "Element-wise ceiling (toward +inf)."
+    tags: [numpy, arithmetic]
+
+  # ── reductions / aggregations ────────────────────────────────────
+  - id: tn-sum-all
+    structure: np_sum_all
+    language: numpy
+    difficulty: 1
+    text: "s = A.sum()"
+    description: "Sum every element."
+    tags: [numpy, reduce]
+  - id: tn-sum-axis
+    structure: np_sum_axis
+    language: numpy
+    difficulty: 2
+    text: "col_sums = A.sum(axis=0)"
+    description: "Sum down rows — one per column."
+    tags: [numpy, reduce]
+  - id: tn-mean-axis
+    structure: np_mean_axis
+    language: numpy
+    difficulty: 2
+    text: "row_means = A.mean(axis=1)"
+    description: "Mean across columns — one per row."
+    tags: [numpy, reduce]
+  - id: tn-std
+    structure: np_std
+    language: numpy
+    difficulty: 2
+    text: "sigma = A.std(axis=0, ddof=1)"
+    description: "Sample stddev per column (ddof=1)."
+    tags: [numpy, reduce]
+  - id: tn-var
+    structure: np_var
+    language: numpy
+    difficulty: 2
+    text: "var = A.var(axis=0)"
+    description: "Population variance per column."
+    tags: [numpy, reduce]
+  - id: tn-min-max
+    structure: np_min_max
+    language: numpy
+    difficulty: 2
+    text: "lo, hi = A.min(), A.max()"
+    description: "Global min / max."
+    tags: [numpy, reduce]
+  - id: tn-argmin
+    structure: np_argmin
+    language: numpy
+    difficulty: 3
+    text: "i = np.argmin(A, axis=0)"
+    description: "Index of min along axis."
+    tags: [numpy, reduce]
+  - id: tn-argmax
+    structure: np_argmax
+    language: numpy
+    difficulty: 3
+    text: "j = np.argmax(A, axis=1)"
+    description: "Index of max along axis."
+    tags: [numpy, reduce]
+  - id: tn-cumsum
+    structure: np_cumsum
+    language: numpy
+    difficulty: 3
+    text: "C = np.cumsum(A, axis=0)"
+    description: "Running sum down rows."
+    tags: [numpy, reduce]
+  - id: tn-cumprod
+    structure: np_cumprod
+    language: numpy
+    difficulty: 3
+    text: "P = np.cumprod(v)"
+    description: "Running product."
+    tags: [numpy, reduce]
+  - id: tn-prod
+    structure: np_prod
+    language: numpy
+    difficulty: 2
+    text: "p = np.prod(v)"
+    description: "Product of all elements."
+    tags: [numpy, reduce]
+  - id: tn-any-all
+    structure: np_any_all
+    language: numpy
+    difficulty: 2
+    text: "ok = (A >= 0).all()"
+    description: "Element-wise predicate then reduce."
+    tags: [numpy, reduce, mask]
+  - id: tn-count-nonzero
+    structure: np_count_nonzero
+    language: numpy
+    difficulty: 2
+    text: "n = np.count_nonzero(A > 0)"
+    description: "Count truthy elements."
+    tags: [numpy, reduce, mask]
+  - id: tn-median
+    structure: np_median
+    language: numpy
+    difficulty: 2
+    text: "m = np.median(A, axis=1)"
+    description: "Median per row."
+    tags: [numpy, reduce]
+  - id: tn-percentile
+    structure: np_percentile
+    language: numpy
+    difficulty: 3
+    text: "q = np.percentile(A, [25, 50, 75])"
+    description: "Quartiles across all elements."
+    tags: [numpy, reduce]
+
+  # ── matrix / linear algebra ──────────────────────────────────────
+  - id: tn-matmul
+    structure: np_matmul
+    language: numpy
+    difficulty: 2
+    text: "C = A @ B"
+    description: "Matrix product (PEP 465 operator)."
+    tags: [numpy, matrix, linalg]
+  - id: tn-matmul-fn
+    structure: np_matmul_fn
+    language: numpy
+    difficulty: 2
+    text: "C = np.matmul(A, B)"
+    description: "Matrix product function form."
+    tags: [numpy, matrix, linalg]
+  - id: tn-dot
+    structure: np_dot
+    language: numpy
+    difficulty: 2
+    text: "c = np.dot(u, v)"
+    description: "Dot product of 1-D vectors."
+    tags: [numpy, matrix, linalg]
+  - id: tn-inner
+    structure: np_inner
+    language: numpy
+    difficulty: 3
+    text: "g = np.inner(A, B)"
+    description: "Sum over last axis (1-D inner / batched contraction)."
+    tags: [numpy, matrix, linalg]
+  - id: tn-outer
+    structure: np_outer
+    language: numpy
+    difficulty: 3
+    text: "K = np.outer(u, v)"
+    description: "Outer product — column × row → matrix."
+    tags: [numpy, matrix, linalg]
+  - id: tn-cross
+    structure: np_cross
+    language: numpy
+    difficulty: 3
+    text: "c = np.cross(u, v)"
+    description: "Vector cross product (3-D)."
+    tags: [numpy, linalg]
+  - id: tn-trace
+    structure: np_trace
+    language: numpy
+    difficulty: 2
+    text: "t = np.trace(A)"
+    description: "Sum of diagonal entries."
+    tags: [numpy, linalg]
+  - id: tn-diag
+    structure: np_diag
+    language: numpy
+    difficulty: 2
+    text: "d = np.diag(A)"
+    description: "Extract diagonal vector (or build diag matrix from vector)."
+    tags: [numpy, linalg]
+  - id: tn-diagflat
+    structure: np_diagflat
+    language: numpy
+    difficulty: 3
+    text: "D = np.diagflat([1, 2, 3])"
+    description: "Diagonal matrix from a flattened input."
+    tags: [numpy, linalg]
+  - id: tn-eye-k
+    structure: np_eye_offset
+    language: numpy
+    difficulty: 3
+    text: "U = np.eye(N, k=1)"
+    description: "Identity shifted up — super-diagonal."
+    tags: [numpy, linalg]
+  - id: tn-det
+    structure: np_det
+    language: numpy
+    difficulty: 3
+    text: "d = np.linalg.det(A)"
+    description: "Determinant of square matrix."
+    tags: [numpy, linalg]
+  - id: tn-inv
+    structure: np_inv
+    language: numpy
+    difficulty: 3
+    text: "Ai = np.linalg.inv(A)"
+    description: "Matrix inverse — beware singular!"
+    tags: [numpy, linalg]
+  - id: tn-pinv
+    structure: np_pinv
+    language: numpy
+    difficulty: 3
+    text: "Ap = np.linalg.pinv(A)"
+    description: "Moore-Penrose pseudoinverse."
+    tags: [numpy, linalg]
+  - id: tn-solve
+    structure: np_solve
+    language: numpy
+    difficulty: 3
+    text: "x = np.linalg.solve(A, b)"
+    description: "Solve Ax = b without forming A^-1."
+    tags: [numpy, linalg]
+  - id: tn-lstsq
+    structure: np_lstsq
+    language: numpy
+    difficulty: 3
+    text: "x, *_ = np.linalg.lstsq(A, b, rcond=None)"
+    description: "Least-squares solution to over/under-determined system."
+    tags: [numpy, linalg]
+  - id: tn-norm
+    structure: np_norm
+    language: numpy
+    difficulty: 3
+    text: "n = np.linalg.norm(v, ord=2)"
+    description: "Vector L2 norm (ord=2 default)."
+    tags: [numpy, linalg]
+  - id: tn-norm-axis
+    structure: np_norm_axis
+    language: numpy
+    difficulty: 3
+    text: "row_norms = np.linalg.norm(A, axis=1)"
+    description: "Per-row L2 norm — useful for unit vectors."
+    tags: [numpy, linalg]
+  - id: tn-rank
+    structure: np_rank
+    language: numpy
+    difficulty: 3
+    text: "r = np.linalg.matrix_rank(A)"
+    description: "Rank from SVD threshold."
+    tags: [numpy, linalg]
+  - id: tn-eig
+    structure: np_eig
+    language: numpy
+    difficulty: 3
+    text: "w, V = np.linalg.eig(A)"
+    description: "Eigenvalues and eigenvectors (general)."
+    tags: [numpy, linalg]
+  - id: tn-eigh
+    structure: np_eigh
+    language: numpy
+    difficulty: 3
+    text: "w, V = np.linalg.eigh(S)"
+    description: "Eig for symmetric/Hermitian — faster, real eigenvalues."
+    tags: [numpy, linalg]
+  - id: tn-svd
+    structure: np_svd
+    language: numpy
+    difficulty: 3
+    text: "U, s, Vt = np.linalg.svd(A, full_matrices=False)"
+    description: "Thin singular value decomposition."
+    tags: [numpy, linalg]
+  - id: tn-qr
+    structure: np_qr
+    language: numpy
+    difficulty: 3
+    text: "Q, R = np.linalg.qr(A)"
+    description: "QR decomposition."
+    tags: [numpy, linalg]
+  - id: tn-cholesky
+    structure: np_cholesky
+    language: numpy
+    difficulty: 3
+    text: "L = np.linalg.cholesky(S)"
+    description: "Cholesky factor of SPD matrix."
+    tags: [numpy, linalg]
+  - id: tn-kron
+    structure: np_kron
+    language: numpy
+    difficulty: 3
+    text: "K = np.kron(A, B)"
+    description: "Kronecker product."
+    tags: [numpy, linalg]
+  - id: tn-einsum-mm
+    structure: np_einsum_mm
+    language: numpy
+    difficulty: 3
+    text: "C = np.einsum('ij,jk->ik', A, B)"
+    description: "Matrix multiply via einsum."
+    tags: [numpy, linalg, einsum]
+  - id: tn-einsum-trace
+    structure: np_einsum_trace
+    language: numpy
+    difficulty: 3
+    text: "t = np.einsum('ii->', A)"
+    description: "Trace via einsum diagonal sum."
+    tags: [numpy, linalg, einsum]
+  - id: tn-einsum-batch
+    structure: np_einsum_batch
+    language: numpy
+    difficulty: 3
+    text: "Y = np.einsum('bij,bjk->bik', X, W)"
+    description: "Batched matmul along leading axis."
+    tags: [numpy, linalg, einsum]
+
+  # ── broadcasting ─────────────────────────────────────────────────
+  - id: tn-broadcast-rowvec
+    structure: np_bcast_row
+    language: numpy
+    difficulty: 2
+    text: "B = A + row[None, :]"
+    description: "Add a row vector to every row."
+    tags: [numpy, broadcasting]
+  - id: tn-broadcast-colvec
+    structure: np_bcast_col
+    language: numpy
+    difficulty: 2
+    text: "B = A + col[:, None]"
+    description: "Add a column vector to every column."
+    tags: [numpy, broadcasting]
+  - id: tn-broadcast-to
+    structure: np_broadcast_to
+    language: numpy
+    difficulty: 3
+    text: "B = np.broadcast_to(v, (3, len(v)))"
+    description: "Materialize a broadcast view explicitly."
+    tags: [numpy, broadcasting]
+  - id: tn-meshgrid
+    structure: np_meshgrid
+    language: numpy
+    difficulty: 3
+    text: "X, Y = np.meshgrid(x, y, indexing='ij')"
+    description: "2-D coordinate grids — matrix indexing convention."
+    tags: [numpy, broadcasting]
+  - id: tn-ogrid
+    structure: np_ogrid
+    language: numpy
+    difficulty: 3
+    text: "i, j = np.ogrid[:m, :n]"
+    description: "Open meshgrid — broadcasts at use."
+    tags: [numpy, broadcasting]
+  - id: tn-normalize-rows
+    structure: np_normalize_rows
+    language: numpy
+    difficulty: 3
+    text: "Xn = X / np.linalg.norm(X, axis=1, keepdims=True)"
+    description: "L2-normalize each row via keepdims trick."
+    tags: [numpy, broadcasting, linalg]
+  - id: tn-center
+    structure: np_center
+    language: numpy
+    difficulty: 2
+    text: "Xc = X - X.mean(axis=0)"
+    description: "Center columns to zero mean."
+    tags: [numpy, broadcasting, reduce]
+
+  # ── dtype / conversion ───────────────────────────────────────────
+  - id: tn-astype-float
+    structure: np_astype_float
+    language: numpy
+    difficulty: 2
+    text: "A = A.astype(np.float32)"
+    description: "Cast to single precision."
+    tags: [numpy, dtype]
+  - id: tn-astype-int
+    structure: np_astype_int
+    language: numpy
+    difficulty: 2
+    text: "B = B.astype(np.int64, copy=False)"
+    description: "Cast in place when safe."
+    tags: [numpy, dtype]
+  - id: tn-dtype-of
+    structure: np_dtype
+    language: numpy
+    difficulty: 1
+    text: "dt = A.dtype"
+    description: "Inspect element dtype."
+    tags: [numpy, dtype]
+  - id: tn-itemsize
+    structure: np_itemsize
+    language: numpy
+    difficulty: 2
+    text: "nb = A.itemsize"
+    description: "Bytes per element."
+    tags: [numpy, dtype]
+
+  # ── view vs copy ─────────────────────────────────────────────────
+  - id: tn-copy
+    structure: np_copy
+    language: numpy
+    difficulty: 1
+    text: "B = A.copy()"
+    description: "Deep copy — independent buffer."
+    tags: [numpy, view-copy]
+  - id: tn-view
+    structure: np_view
+    language: numpy
+    difficulty: 2
+    text: "B = A.view()"
+    description: "Shallow view — shares buffer."
+    tags: [numpy, view-copy]
+  - id: tn-base
+    structure: np_base
+    language: numpy
+    difficulty: 2
+    text: "owns = A.base is None"
+    description: "Check if array owns its data."
+    tags: [numpy, view-copy]
+  - id: tn-ascontig
+    structure: np_ascontig
+    language: numpy
+    difficulty: 3
+    text: "B = np.ascontiguousarray(A)"
+    description: "Force C-contiguous memory layout."
+    tags: [numpy, view-copy]
+
+  # ── sort / unique / search ───────────────────────────────────────
+  - id: tn-sort
+    structure: np_sort
+    language: numpy
+    difficulty: 2
+    text: "S = np.sort(A, axis=1)"
+    description: "Sort each row independently."
+    tags: [numpy, sort]
+  - id: tn-argsort
+    structure: np_argsort
+    language: numpy
+    difficulty: 3
+    text: "idx = np.argsort(v)"
+    description: "Indices that would sort v."
+    tags: [numpy, sort]
+  - id: tn-lexsort
+    structure: np_lexsort
+    language: numpy
+    difficulty: 3
+    text: "order = np.lexsort((second, first))"
+    description: "Multi-key sort — last key is primary."
+    tags: [numpy, sort]
+  - id: tn-unique
+    structure: np_unique
+    language: numpy
+    difficulty: 2
+    text: "u, counts = np.unique(v, return_counts=True)"
+    description: "Distinct values + frequency."
+    tags: [numpy, sort]
+  - id: tn-searchsorted
+    structure: np_searchsorted
+    language: numpy
+    difficulty: 3
+    text: "pos = np.searchsorted(sorted_v, keys)"
+    description: "Insertion points to keep sortedness — binary search."
+    tags: [numpy, sort]
+  - id: tn-clip-in
+    structure: np_clip_in
+    language: numpy
+    difficulty: 3
+    text: "np.clip(A, 0, 1, out=A)"
+    description: "In-place clip using out= parameter."
+    tags: [numpy, sort]
+
+  # ── random ───────────────────────────────────────────────────────
+  - id: tn-rng-default
+    structure: np_rng
+    language: numpy
+    difficulty: 2
+    text: "rng = np.random.default_rng(seed=42)"
+    description: "Modern Generator with reproducible seed."
+    tags: [numpy, random]
+  - id: tn-rng-normal
+    structure: np_rng_normal
+    language: numpy
+    difficulty: 3
+    text: "X = rng.normal(loc=0, scale=1, size=(3, 4))"
+    description: "Draw from N(0, 1) into a (3,4) matrix."
+    tags: [numpy, random]
+  - id: tn-rng-uniform
+    structure: np_rng_uniform
+    language: numpy
+    difficulty: 3
+    text: "U = rng.uniform(low=0, high=1, size=(2, 5))"
+    description: "Uniform draws in [low, high)."
+    tags: [numpy, random]
+  - id: tn-rng-int
+    structure: np_rng_int
+    language: numpy
+    difficulty: 3
+    text: "I = rng.integers(low=0, high=10, size=(3, 3))"
+    description: "Random integers in [low, high)."
+    tags: [numpy, random]
+  - id: tn-rng-choice
+    structure: np_rng_choice
+    language: numpy
+    difficulty: 3
+    text: "pick = rng.choice(v, size=5, replace=False)"
+    description: "Sample without replacement."
+    tags: [numpy, random]
+  - id: tn-rng-shuffle
+    structure: np_rng_shuffle
+    language: numpy
+    difficulty: 3
+    text: "rng.shuffle(v)"
+    description: "In-place permutation."
+    tags: [numpy, random]
+  - id: tn-rng-perm
+    structure: np_rng_perm
+    language: numpy
+    difficulty: 3
+    text: "p = rng.permutation(n)"
+    description: "Return a permutation of 0..n-1."
+    tags: [numpy, random]
+
+  # ── i/o / serialization ──────────────────────────────────────────
+  - id: tn-save
+    structure: np_save
+    language: numpy
+    difficulty: 3
+    text: "np.save('A.npy', A)"
+    description: "Save single ndarray to .npy."
+    tags: [numpy, io]
+  - id: tn-load
+    structure: np_load
+    language: numpy
+    difficulty: 3
+    text: "A = np.load('A.npy')"
+    description: "Load .npy back."
+    tags: [numpy, io]
+  - id: tn-savez
+    structure: np_savez
+    language: numpy
+    difficulty: 3
+    text: "np.savez('bundle.npz', A=A, B=B)"
+    description: "Save multiple arrays by name."
+    tags: [numpy, io]
+  - id: tn-loadtxt
+    structure: np_loadtxt
+    language: numpy
+    difficulty: 3
+    text: "A = np.loadtxt('data.csv', delimiter=',')"
+    description: "Read CSV into ndarray."
+    tags: [numpy, io]

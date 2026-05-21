@@ -1,0 +1,1190 @@
+snippets:
+  # ── import + i/o ─────────────────────────────────────────────────
+  - id: tp-import
+    structure: pd_import
+    language: pandas
+    difficulty: 1
+    text: "import pandas as pd"
+    description: "Canonical pandas import alias."
+    tags: [pandas, import]
+  - id: tp-read-csv
+    structure: pd_read_csv
+    language: pandas
+    difficulty: 2
+    text: "df = pd.read_csv('data.csv')"
+    description: "Read CSV into a DataFrame."
+    tags: [pandas, io]
+  - id: tp-read-csv-opts
+    structure: pd_read_csv_opts
+    language: pandas
+    difficulty: 3
+    text: "df = pd.read_csv('data.csv', sep=';', dtype={'id': int})"
+    description: "Custom separator + per-column dtype."
+    tags: [pandas, io, dtype]
+  - id: tp-read-parquet
+    structure: pd_read_parquet
+    language: pandas
+    difficulty: 3
+    text: "df = pd.read_parquet('data.parquet')"
+    description: "Read Parquet — columnar, typed, compressed."
+    tags: [pandas, io]
+  - id: tp-read-json
+    structure: pd_read_json
+    language: pandas
+    difficulty: 3
+    text: "df = pd.read_json('data.json', lines=True)"
+    description: "Read newline-delimited JSON."
+    tags: [pandas, io]
+  - id: tp-read-excel
+    structure: pd_read_excel
+    language: pandas
+    difficulty: 3
+    text: "df = pd.read_excel('book.xlsx', sheet_name='Q1')"
+    description: "Read a specific Excel sheet."
+    tags: [pandas, io]
+  - id: tp-read-sql
+    structure: pd_read_sql
+    language: pandas
+    difficulty: 3
+    text: "df = pd.read_sql('SELECT * FROM t', con=conn)"
+    description: "Pull a query result into a DataFrame."
+    tags: [pandas, io]
+  - id: tp-to-csv
+    structure: pd_to_csv
+    language: pandas
+    difficulty: 2
+    text: "df.to_csv('out.csv', index=False)"
+    description: "Write without the index column."
+    tags: [pandas, io]
+  - id: tp-to-parquet
+    structure: pd_to_parquet
+    language: pandas
+    difficulty: 3
+    text: "df.to_parquet('out.parquet', compression='zstd')"
+    description: "Write Parquet with zstd compression."
+    tags: [pandas, io]
+  - id: tp-to-json
+    structure: pd_to_json
+    language: pandas
+    difficulty: 3
+    text: "df.to_json('out.json', orient='records', lines=True)"
+    description: "Newline-delimited JSON for streaming."
+    tags: [pandas, io]
+
+  # ── creation ─────────────────────────────────────────────────────
+  - id: tp-series-list
+    structure: pd_series_list
+    language: pandas
+    difficulty: 1
+    text: "s = pd.Series([1, 2, 3])"
+    description: "Series from a list."
+    tags: [pandas, creation, series]
+  - id: tp-series-dict
+    structure: pd_series_dict
+    language: pandas
+    difficulty: 2
+    text: "s = pd.Series({'a': 1, 'b': 2})"
+    description: "Series from dict — keys become index."
+    tags: [pandas, creation, series]
+  - id: tp-series-named
+    structure: pd_series_named
+    language: pandas
+    difficulty: 2
+    text: "s = pd.Series(vals, name='score')"
+    description: "Named Series — name carries through joins."
+    tags: [pandas, creation, series]
+  - id: tp-df-dict
+    structure: pd_df_dict
+    language: pandas
+    difficulty: 2
+    text: "df = pd.DataFrame({'a': [1, 2], 'b': [3, 4]})"
+    description: "DataFrame from column dict."
+    tags: [pandas, creation]
+  - id: tp-df-records
+    structure: pd_df_records
+    language: pandas
+    difficulty: 2
+    text: "df = pd.DataFrame.from_records(rows)"
+    description: "DataFrame from a list of row tuples/dicts."
+    tags: [pandas, creation]
+  - id: tp-df-numpy
+    structure: pd_df_numpy
+    language: pandas
+    difficulty: 3
+    text: "df = pd.DataFrame(X, columns=['a', 'b', 'c'])"
+    description: "Wrap a NumPy array with named columns."
+    tags: [pandas, creation]
+  - id: tp-empty-df
+    structure: pd_empty_df
+    language: pandas
+    difficulty: 2
+    text: "df = pd.DataFrame(columns=['a', 'b'])"
+    description: "Empty frame with predeclared columns."
+    tags: [pandas, creation]
+
+  # ── inspection ───────────────────────────────────────────────────
+  - id: tp-head
+    structure: pd_head
+    language: pandas
+    difficulty: 1
+    text: "df.head(10)"
+    description: "First N rows."
+    tags: [pandas, inspect]
+  - id: tp-tail
+    structure: pd_tail
+    language: pandas
+    difficulty: 1
+    text: "df.tail(5)"
+    description: "Last N rows."
+    tags: [pandas, inspect]
+  - id: tp-info
+    structure: pd_info
+    language: pandas
+    difficulty: 1
+    text: "df.info()"
+    description: "Schema + memory + non-null counts."
+    tags: [pandas, inspect]
+  - id: tp-describe
+    structure: pd_describe
+    language: pandas
+    difficulty: 2
+    text: "df.describe(include='all')"
+    description: "Summary stats including object/categorical."
+    tags: [pandas, inspect]
+  - id: tp-shape
+    structure: pd_shape
+    language: pandas
+    difficulty: 1
+    text: "rows, cols = df.shape"
+    description: "Frame dimensions."
+    tags: [pandas, inspect]
+  - id: tp-dtypes
+    structure: pd_dtypes
+    language: pandas
+    difficulty: 1
+    text: "df.dtypes"
+    description: "Per-column dtypes."
+    tags: [pandas, inspect, dtype]
+  - id: tp-columns
+    structure: pd_columns
+    language: pandas
+    difficulty: 1
+    text: "cols = df.columns.tolist()"
+    description: "Column index as list."
+    tags: [pandas, inspect]
+  - id: tp-index
+    structure: pd_index
+    language: pandas
+    difficulty: 1
+    text: "idx = df.index"
+    description: "Row index object."
+    tags: [pandas, inspect]
+  - id: tp-memory
+    structure: pd_memory
+    language: pandas
+    difficulty: 3
+    text: "df.memory_usage(deep=True).sum()"
+    description: "True memory incl. object data (bytes)."
+    tags: [pandas, inspect]
+  - id: tp-sample
+    structure: pd_sample
+    language: pandas
+    difficulty: 2
+    text: "df.sample(n=5, random_state=42)"
+    description: "Random N rows with a seed."
+    tags: [pandas, inspect]
+
+  # ── selection / indexing ─────────────────────────────────────────
+  - id: tp-col
+    structure: pd_col
+    language: pandas
+    difficulty: 1
+    text: "s = df['a']"
+    description: "Single column as Series."
+    tags: [pandas, select]
+  - id: tp-cols
+    structure: pd_cols
+    language: pandas
+    difficulty: 2
+    text: "sub = df[['a', 'b', 'c']]"
+    description: "Multiple columns — note double brackets."
+    tags: [pandas, select]
+  - id: tp-loc-label
+    structure: pd_loc_label
+    language: pandas
+    difficulty: 2
+    text: "row = df.loc['x']"
+    description: "Row by label."
+    tags: [pandas, select, loc]
+  - id: tp-loc-slice
+    structure: pd_loc_slice
+    language: pandas
+    difficulty: 3
+    text: "sub = df.loc['a':'c', ['x', 'y']]"
+    description: "Label slice rows + column list."
+    tags: [pandas, select, loc]
+  - id: tp-iloc-row
+    structure: pd_iloc_row
+    language: pandas
+    difficulty: 2
+    text: "row = df.iloc[0]"
+    description: "Row by positional index."
+    tags: [pandas, select, iloc]
+  - id: tp-iloc-slice
+    structure: pd_iloc_slice
+    language: pandas
+    difficulty: 3
+    text: "sub = df.iloc[0:5, 1:3]"
+    description: "Positional row and column slice."
+    tags: [pandas, select, iloc]
+  - id: tp-iloc-fancy
+    structure: pd_iloc_fancy
+    language: pandas
+    difficulty: 3
+    text: "rows = df.iloc[[0, 2, -1]]"
+    description: "Fancy positional row pick."
+    tags: [pandas, select, iloc]
+  - id: tp-at
+    structure: pd_at
+    language: pandas
+    difficulty: 3
+    text: "v = df.at[idx, 'price']"
+    description: "Single cell by label — fastest scalar access."
+    tags: [pandas, select]
+  - id: tp-iat
+    structure: pd_iat
+    language: pandas
+    difficulty: 3
+    text: "v = df.iat[0, 2]"
+    description: "Single cell by positions — fastest positional."
+    tags: [pandas, select]
+  - id: tp-attr-access
+    structure: pd_attr_access
+    language: pandas
+    difficulty: 2
+    text: "s = df.column_name"
+    description: "Attribute-style column access (only if name is identifier)."
+    tags: [pandas, select]
+  - id: tp-set-cell
+    structure: pd_set_cell
+    language: pandas
+    difficulty: 3
+    text: "df.loc[idx, 'price'] = 9.99"
+    description: "Set a cell by label."
+    tags: [pandas, select]
+  - id: tp-bool-mask
+    structure: pd_bool_mask
+    language: pandas
+    difficulty: 2
+    text: "sub = df[df['x'] > 0]"
+    description: "Boolean masking — keep matching rows."
+    tags: [pandas, select, mask]
+  - id: tp-and-mask
+    structure: pd_and_mask
+    language: pandas
+    difficulty: 3
+    text: "sub = df[(df['x'] > 0) & (df['y'] < 10)]"
+    description: "AND mask — wrap each clause in parens."
+    tags: [pandas, select, mask]
+  - id: tp-or-mask
+    structure: pd_or_mask
+    language: pandas
+    difficulty: 3
+    text: "sub = df[(df['x'] > 0) | (df['x'].isna())]"
+    description: "OR with isna() — handle missing."
+    tags: [pandas, select, mask]
+  - id: tp-isin
+    structure: pd_isin
+    language: pandas
+    difficulty: 2
+    text: "sub = df[df['k'].isin(['a', 'b', 'c'])]"
+    description: "Filter rows whose value is in a set."
+    tags: [pandas, select, mask]
+  - id: tp-between
+    structure: pd_between
+    language: pandas
+    difficulty: 3
+    text: "sub = df[df['x'].between(0, 1, inclusive='both')]"
+    description: "Range filter — endpoints included."
+    tags: [pandas, select, mask]
+  - id: tp-query
+    structure: pd_query
+    language: pandas
+    difficulty: 3
+    text: "sub = df.query('x > 0 and y < 10')"
+    description: "Pandas query string — cleaner for compound filters."
+    tags: [pandas, select, mask]
+  - id: tp-where
+    structure: pd_where
+    language: pandas
+    difficulty: 3
+    text: "out = df.where(df > 0, other=0)"
+    description: "Keep elements where cond is True, else other."
+    tags: [pandas, select, mask]
+  - id: tp-mask-method
+    structure: pd_mask_method
+    language: pandas
+    difficulty: 3
+    text: "out = df.mask(df < 0, other=0)"
+    description: "Inverse of where — replace where cond True."
+    tags: [pandas, select, mask]
+
+  # ── missing data ─────────────────────────────────────────────────
+  - id: tp-isna
+    structure: pd_isna
+    language: pandas
+    difficulty: 1
+    text: "mask = df['x'].isna()"
+    description: "Boolean mask of missing values."
+    tags: [pandas, missing]
+  - id: tp-notna
+    structure: pd_notna
+    language: pandas
+    difficulty: 1
+    text: "mask = df['x'].notna()"
+    description: "Boolean mask of present values."
+    tags: [pandas, missing]
+  - id: tp-fillna-scalar
+    structure: pd_fillna_scalar
+    language: pandas
+    difficulty: 2
+    text: "df['x'] = df['x'].fillna(0)"
+    description: "Replace NaN with a scalar."
+    tags: [pandas, missing]
+  - id: tp-fillna-method
+    structure: pd_fillna_method
+    language: pandas
+    difficulty: 3
+    text: "df = df.fillna(method='ffill')"
+    description: "Forward-fill last valid observation."
+    tags: [pandas, missing]
+  - id: tp-fillna-dict
+    structure: pd_fillna_dict
+    language: pandas
+    difficulty: 3
+    text: "df = df.fillna({'x': 0, 'y': df['y'].mean()})"
+    description: "Per-column fill values."
+    tags: [pandas, missing]
+  - id: tp-dropna-any
+    structure: pd_dropna_any
+    language: pandas
+    difficulty: 2
+    text: "clean = df.dropna()"
+    description: "Drop rows with any NaN."
+    tags: [pandas, missing]
+  - id: tp-dropna-subset
+    structure: pd_dropna_subset
+    language: pandas
+    difficulty: 3
+    text: "clean = df.dropna(subset=['x', 'y'])"
+    description: "Drop rows missing the listed columns."
+    tags: [pandas, missing]
+  - id: tp-dropna-thresh
+    structure: pd_dropna_thresh
+    language: pandas
+    difficulty: 3
+    text: "keep = df.dropna(thresh=3)"
+    description: "Keep rows with at least 3 non-null cells."
+    tags: [pandas, missing]
+  - id: tp-interpolate
+    structure: pd_interpolate
+    language: pandas
+    difficulty: 3
+    text: "df = df.interpolate(method='linear')"
+    description: "Linearly interpolate gaps."
+    tags: [pandas, missing]
+  - id: tp-replace
+    structure: pd_replace
+    language: pandas
+    difficulty: 2
+    text: "df = df.replace({'?': None, 'N/A': None})"
+    description: "Replace sentinels with NaN."
+    tags: [pandas, missing]
+
+  # ── duplicates ───────────────────────────────────────────────────
+  - id: tp-duplicated
+    structure: pd_duplicated
+    language: pandas
+    difficulty: 2
+    text: "mask = df.duplicated(subset=['id'])"
+    description: "Mark rows whose key appeared earlier."
+    tags: [pandas, dedup]
+  - id: tp-drop-dup
+    structure: pd_drop_dup
+    language: pandas
+    difficulty: 2
+    text: "df = df.drop_duplicates(subset=['id'], keep='last')"
+    description: "Keep the most recent record per id."
+    tags: [pandas, dedup]
+
+  # ── dtype / conversion ───────────────────────────────────────────
+  - id: tp-astype-col
+    structure: pd_astype_col
+    language: pandas
+    difficulty: 2
+    text: "df['n'] = df['n'].astype('int64')"
+    description: "Cast a column to int64."
+    tags: [pandas, dtype]
+  - id: tp-astype-cat
+    structure: pd_astype_cat
+    language: pandas
+    difficulty: 3
+    text: "df['k'] = df['k'].astype('category')"
+    description: "Cast to categorical — saves memory for low-card cols."
+    tags: [pandas, dtype, categorical]
+  - id: tp-to-numeric
+    structure: pd_to_numeric
+    language: pandas
+    difficulty: 3
+    text: "df['n'] = pd.to_numeric(df['n'], errors='coerce')"
+    description: "Coerce strings to numbers, bad values → NaN."
+    tags: [pandas, dtype]
+  - id: tp-to-datetime
+    structure: pd_to_datetime
+    language: pandas
+    difficulty: 3
+    text: "df['ts'] = pd.to_datetime(df['ts'], utc=True)"
+    description: "Parse strings into timezone-aware datetimes."
+    tags: [pandas, dtype, datetime]
+  - id: tp-to-timedelta
+    structure: pd_to_timedelta
+    language: pandas
+    difficulty: 3
+    text: "df['dur'] = pd.to_timedelta(df['dur'], unit='s')"
+    description: "Build timedeltas from seconds."
+    tags: [pandas, dtype, datetime]
+  - id: tp-convert-dtypes
+    structure: pd_convert_dtypes
+    language: pandas
+    difficulty: 3
+    text: "df = df.convert_dtypes()"
+    description: "Promote to nullable pandas dtypes (Int64, string, boolean)."
+    tags: [pandas, dtype]
+
+  # ── arithmetic / element-wise ────────────────────────────────────
+  - id: tp-arith-cols
+    structure: pd_arith_cols
+    language: pandas
+    difficulty: 1
+    text: "df['z'] = df['x'] + df['y']"
+    description: "Element-wise add into a new column."
+    tags: [pandas, arithmetic]
+  - id: tp-arith-mul
+    structure: pd_arith_mul
+    language: pandas
+    difficulty: 1
+    text: "df['rev'] = df['price'] * df['qty']"
+    description: "Compute revenue per row."
+    tags: [pandas, arithmetic]
+  - id: tp-arith-scalar
+    structure: pd_arith_scalar
+    language: pandas
+    difficulty: 1
+    text: "df['x_pct'] = df['x'] / df['x'].sum()"
+    description: "Normalize a column by its total."
+    tags: [pandas, arithmetic]
+  - id: tp-arith-log
+    structure: pd_arith_log
+    language: pandas
+    difficulty: 2
+    text: "df['logx'] = np.log1p(df['x'])"
+    description: "log(1+x) — safe at 0."
+    tags: [pandas, arithmetic, numpy]
+  - id: tp-clip
+    structure: pd_clip
+    language: pandas
+    difficulty: 2
+    text: "df['x'] = df['x'].clip(lower=0, upper=100)"
+    description: "Bound values to a range."
+    tags: [pandas, arithmetic]
+  - id: tp-round
+    structure: pd_round
+    language: pandas
+    difficulty: 2
+    text: "df['x'] = df['x'].round(3)"
+    description: "Round to N decimals."
+    tags: [pandas, arithmetic]
+  - id: tp-rank
+    structure: pd_rank
+    language: pandas
+    difficulty: 3
+    text: "df['r'] = df['score'].rank(method='dense', ascending=False)"
+    description: "Dense rank — no gaps on ties."
+    tags: [pandas, arithmetic]
+  - id: tp-pct-change
+    structure: pd_pct_change
+    language: pandas
+    difficulty: 3
+    text: "df['ret'] = df['price'].pct_change()"
+    description: "Percent change vs prior row — returns."
+    tags: [pandas, arithmetic]
+  - id: tp-shift
+    structure: pd_shift
+    language: pandas
+    difficulty: 3
+    text: "df['lag1'] = df['x'].shift(1)"
+    description: "Shift values down by N (introduces NaN at top)."
+    tags: [pandas, arithmetic]
+  - id: tp-diff
+    structure: pd_diff
+    language: pandas
+    difficulty: 3
+    text: "df['dx'] = df['x'].diff()"
+    description: "First-difference series."
+    tags: [pandas, arithmetic]
+  - id: tp-cumsum
+    structure: pd_cumsum
+    language: pandas
+    difficulty: 3
+    text: "df['running'] = df['x'].cumsum()"
+    description: "Running total."
+    tags: [pandas, arithmetic]
+  - id: tp-where-scalar
+    structure: pd_where_scalar
+    language: pandas
+    difficulty: 3
+    text: "df['x'] = df['x'].where(df['x'] >= 0, 0)"
+    description: "Per-element clip to zero from below."
+    tags: [pandas, arithmetic, mask]
+
+  # ── apply / map ──────────────────────────────────────────────────
+  - id: tp-apply-col
+    structure: pd_apply_col
+    language: pandas
+    difficulty: 3
+    text: "df['n'] = df['s'].apply(len)"
+    description: "Apply a callable element-wise to a Series."
+    tags: [pandas, apply]
+  - id: tp-apply-lambda
+    structure: pd_apply_lambda
+    language: pandas
+    difficulty: 3
+    text: "df['x2'] = df['x'].apply(lambda v: v * v)"
+    description: "Lambda for ad-hoc transforms."
+    tags: [pandas, apply, lambda]
+  - id: tp-apply-row
+    structure: pd_apply_row
+    language: pandas
+    difficulty: 3
+    text: "df['z'] = df.apply(lambda r: r['x'] + r['y'], axis=1)"
+    description: "Row-wise apply — slower but flexible."
+    tags: [pandas, apply, lambda]
+  - id: tp-map-dict
+    structure: pd_map_dict
+    language: pandas
+    difficulty: 2
+    text: "df['name'] = df['code'].map({'A': 'Alpha', 'B': 'Beta'})"
+    description: "Map values via a lookup dict."
+    tags: [pandas, apply]
+  - id: tp-replace-regex
+    structure: pd_replace_regex
+    language: pandas
+    difficulty: 3
+    text: "df['s'] = df['s'].replace(r'\\s+', ' ', regex=True)"
+    description: "Collapse runs of whitespace via regex."
+    tags: [pandas, apply]
+  - id: tp-pipe
+    structure: pd_pipe
+    language: pandas
+    difficulty: 3
+    text: "out = df.pipe(clean).pipe(featurize, n=5)"
+    description: "Chain functions — keeps method-call style."
+    tags: [pandas, apply]
+  - id: tp-assign
+    structure: pd_assign
+    language: pandas
+    difficulty: 3
+    text: "df = df.assign(z=lambda d: d['x'] + d['y'])"
+    description: "Add/overwrite columns inside a chain."
+    tags: [pandas, apply]
+
+  # ── string accessor ──────────────────────────────────────────────
+  - id: tp-str-lower
+    structure: pd_str_lower
+    language: pandas
+    difficulty: 1
+    text: "df['s'] = df['s'].str.lower()"
+    description: "Lowercase via .str accessor."
+    tags: [pandas, string]
+  - id: tp-str-strip
+    structure: pd_str_strip
+    language: pandas
+    difficulty: 1
+    text: "df['s'] = df['s'].str.strip()"
+    description: "Trim leading/trailing whitespace."
+    tags: [pandas, string]
+  - id: tp-str-contains
+    structure: pd_str_contains
+    language: pandas
+    difficulty: 3
+    text: "mask = df['s'].str.contains(r'^foo', regex=True, na=False)"
+    description: "Regex match — treat NaN as False."
+    tags: [pandas, string, mask]
+  - id: tp-str-startswith
+    structure: pd_str_startswith
+    language: pandas
+    difficulty: 2
+    text: "mask = df['s'].str.startswith('prefix_')"
+    description: "Literal prefix check."
+    tags: [pandas, string, mask]
+  - id: tp-str-extract
+    structure: pd_str_extract
+    language: pandas
+    difficulty: 3
+    text: "df[['k', 'v']] = df['s'].str.extract(r'(\\w+)=(\\w+)')"
+    description: "Capture groups into new columns."
+    tags: [pandas, string]
+  - id: tp-str-split
+    structure: pd_str_split
+    language: pandas
+    difficulty: 3
+    text: "df[['a', 'b']] = df['s'].str.split('/', n=1, expand=True)"
+    description: "Split into separate columns."
+    tags: [pandas, string]
+  - id: tp-str-replace
+    structure: pd_str_replace
+    language: pandas
+    difficulty: 3
+    text: "df['s'] = df['s'].str.replace(',', '', regex=False)"
+    description: "Strip commas from text."
+    tags: [pandas, string]
+  - id: tp-str-len
+    structure: pd_str_len
+    language: pandas
+    difficulty: 1
+    text: "df['n'] = df['s'].str.len()"
+    description: "Per-row string length."
+    tags: [pandas, string]
+  - id: tp-str-cat
+    structure: pd_str_cat
+    language: pandas
+    difficulty: 3
+    text: "df['full'] = df['first'].str.cat(df['last'], sep=' ')"
+    description: "Concatenate two string Series."
+    tags: [pandas, string]
+  - id: tp-get-dummies
+    structure: pd_get_dummies
+    language: pandas
+    difficulty: 3
+    text: "X = pd.get_dummies(df, columns=['k'], drop_first=True)"
+    description: "One-hot encode categorical columns."
+    tags: [pandas, string, categorical]
+
+  # ── datetime accessor ────────────────────────────────────────────
+  - id: tp-dt-year
+    structure: pd_dt_year
+    language: pandas
+    difficulty: 1
+    text: "df['y'] = df['ts'].dt.year"
+    description: "Extract year via .dt accessor."
+    tags: [pandas, datetime]
+  - id: tp-dt-dow
+    structure: pd_dt_dow
+    language: pandas
+    difficulty: 2
+    text: "df['dow'] = df['ts'].dt.day_name()"
+    description: "Day-of-week names."
+    tags: [pandas, datetime]
+  - id: tp-dt-floor
+    structure: pd_dt_floor
+    language: pandas
+    difficulty: 3
+    text: "df['hour'] = df['ts'].dt.floor('H')"
+    description: "Truncate timestamps to the hour."
+    tags: [pandas, datetime]
+  - id: tp-dt-tz
+    structure: pd_dt_tz
+    language: pandas
+    difficulty: 3
+    text: "df['ts'] = df['ts'].dt.tz_convert('Asia/Bangkok')"
+    description: "Convert tz-aware timestamps to a local zone."
+    tags: [pandas, datetime]
+  - id: tp-dt-localize
+    structure: pd_dt_localize
+    language: pandas
+    difficulty: 3
+    text: "df['ts'] = df['ts'].dt.tz_localize('UTC')"
+    description: "Attach tz to naive timestamps."
+    tags: [pandas, datetime]
+  - id: tp-date-range
+    structure: pd_date_range
+    language: pandas
+    difficulty: 3
+    text: "idx = pd.date_range('2024-01-01', periods=30, freq='D')"
+    description: "Generate a daily DatetimeIndex."
+    tags: [pandas, datetime]
+  - id: tp-period-range
+    structure: pd_period_range
+    language: pandas
+    difficulty: 3
+    text: "idx = pd.period_range('2024-01', periods=12, freq='M')"
+    description: "Monthly periods for fiscal analysis."
+    tags: [pandas, datetime]
+
+  # ── sorting ──────────────────────────────────────────────────────
+  - id: tp-sort-values
+    structure: pd_sort_values
+    language: pandas
+    difficulty: 2
+    text: "df = df.sort_values('score', ascending=False)"
+    description: "Sort by a column desc."
+    tags: [pandas, sort]
+  - id: tp-sort-multi
+    structure: pd_sort_multi
+    language: pandas
+    difficulty: 3
+    text: "df = df.sort_values(['g', 'score'], ascending=[True, False])"
+    description: "Multi-key sort with mixed directions."
+    tags: [pandas, sort]
+  - id: tp-sort-index
+    structure: pd_sort_index
+    language: pandas
+    difficulty: 2
+    text: "df = df.sort_index()"
+    description: "Sort by row index."
+    tags: [pandas, sort]
+  - id: tp-nlargest
+    structure: pd_nlargest
+    language: pandas
+    difficulty: 3
+    text: "top = df.nlargest(10, 'score')"
+    description: "Top-N by column without full sort."
+    tags: [pandas, sort]
+  - id: tp-nsmallest
+    structure: pd_nsmallest
+    language: pandas
+    difficulty: 3
+    text: "bot = df.nsmallest(5, 'cost')"
+    description: "Bottom-N by column."
+    tags: [pandas, sort]
+
+  # ── index ops ────────────────────────────────────────────────────
+  - id: tp-set-index
+    structure: pd_set_index
+    language: pandas
+    difficulty: 2
+    text: "df = df.set_index('id')"
+    description: "Promote a column to the row index."
+    tags: [pandas, index]
+  - id: tp-reset-index
+    structure: pd_reset_index
+    language: pandas
+    difficulty: 2
+    text: "df = df.reset_index(drop=True)"
+    description: "Reset to default RangeIndex, discard old."
+    tags: [pandas, index]
+  - id: tp-rename-cols
+    structure: pd_rename_cols
+    language: pandas
+    difficulty: 2
+    text: "df = df.rename(columns={'old': 'new'})"
+    description: "Rename specific columns."
+    tags: [pandas, index]
+  - id: tp-rename-fn
+    structure: pd_rename_fn
+    language: pandas
+    difficulty: 3
+    text: "df = df.rename(columns=str.lower)"
+    description: "Lowercase all column names."
+    tags: [pandas, index]
+  - id: tp-drop-cols
+    structure: pd_drop_cols
+    language: pandas
+    difficulty: 2
+    text: "df = df.drop(columns=['tmp', 'debug'])"
+    description: "Drop columns by name."
+    tags: [pandas, index]
+  - id: tp-multiindex
+    structure: pd_multiindex
+    language: pandas
+    difficulty: 3
+    text: "df = df.set_index(['region', 'date'])"
+    description: "Hierarchical MultiIndex."
+    tags: [pandas, index]
+  - id: tp-xs
+    structure: pd_xs
+    language: pandas
+    difficulty: 3
+    text: "row = df.xs('APAC', level='region')"
+    description: "Cross-section out of a MultiIndex level."
+    tags: [pandas, index]
+  - id: tp-swaplevel
+    structure: pd_swaplevel
+    language: pandas
+    difficulty: 3
+    text: "df = df.swaplevel('region', 'date')"
+    description: "Swap two MultiIndex levels."
+    tags: [pandas, index]
+
+  # ── groupby / aggregation ────────────────────────────────────────
+  - id: tp-groupby-sum
+    structure: pd_groupby_sum
+    language: pandas
+    difficulty: 2
+    text: "g = df.groupby('k')['x'].sum()"
+    description: "Sum a column per group."
+    tags: [pandas, groupby]
+  - id: tp-groupby-mean
+    structure: pd_groupby_mean
+    language: pandas
+    difficulty: 2
+    text: "g = df.groupby('k')['x'].mean()"
+    description: "Group mean."
+    tags: [pandas, groupby]
+  - id: tp-groupby-multi
+    structure: pd_groupby_multi
+    language: pandas
+    difficulty: 3
+    text: "g = df.groupby(['r', 'k'])[['x', 'y']].sum()"
+    description: "Multi-key groupby on multiple metrics."
+    tags: [pandas, groupby]
+  - id: tp-groupby-size
+    structure: pd_groupby_size
+    language: pandas
+    difficulty: 2
+    text: "counts = df.groupby('k').size()"
+    description: "Row count per group (includes NaN keys)."
+    tags: [pandas, groupby]
+  - id: tp-groupby-count
+    structure: pd_groupby_count
+    language: pandas
+    difficulty: 2
+    text: "counts = df.groupby('k')['x'].count()"
+    description: "Non-null count per group."
+    tags: [pandas, groupby]
+  - id: tp-groupby-agg-list
+    structure: pd_groupby_agg_list
+    language: pandas
+    difficulty: 3
+    text: "out = df.groupby('k')['x'].agg(['sum', 'mean', 'count'])"
+    description: "Multiple aggregations at once."
+    tags: [pandas, groupby]
+  - id: tp-groupby-agg-named
+    structure: pd_groupby_agg_named
+    language: pandas
+    difficulty: 3
+    text: "out = df.groupby('k').agg(total=('x', 'sum'), n=('x', 'count'))"
+    description: "Named-aggregation API — explicit output columns."
+    tags: [pandas, groupby]
+  - id: tp-groupby-transform
+    structure: pd_groupby_transform
+    language: pandas
+    difficulty: 3
+    text: "df['x_z'] = df.groupby('k')['x'].transform(lambda s: (s - s.mean()) / s.std())"
+    description: "Per-group z-score — output aligned to original rows."
+    tags: [pandas, groupby, apply]
+  - id: tp-groupby-filter
+    structure: pd_groupby_filter
+    language: pandas
+    difficulty: 3
+    text: "big = df.groupby('k').filter(lambda g: len(g) >= 10)"
+    description: "Keep only groups passing a predicate."
+    tags: [pandas, groupby, apply]
+  - id: tp-groupby-apply
+    structure: pd_groupby_apply
+    language: pandas
+    difficulty: 3
+    text: "out = df.groupby('k').apply(lambda g: g.nlargest(3, 'score'))"
+    description: "Per-group transform — top-3 by score."
+    tags: [pandas, groupby, apply]
+  - id: tp-groupby-first
+    structure: pd_groupby_first
+    language: pandas
+    difficulty: 3
+    text: "first = df.sort_values('ts').groupby('k').first()"
+    description: "Earliest row per group after sort."
+    tags: [pandas, groupby]
+  - id: tp-groupby-cum
+    structure: pd_groupby_cum
+    language: pandas
+    difficulty: 3
+    text: "df['cum'] = df.groupby('k')['x'].cumsum()"
+    description: "Cumulative sum within each group."
+    tags: [pandas, groupby, arithmetic]
+  - id: tp-value-counts
+    structure: pd_value_counts
+    language: pandas
+    difficulty: 2
+    text: "counts = df['k'].value_counts()"
+    description: "Frequency of each value, sorted desc."
+    tags: [pandas, groupby]
+  - id: tp-value-counts-norm
+    structure: pd_value_counts_norm
+    language: pandas
+    difficulty: 3
+    text: "freq = df['k'].value_counts(normalize=True)"
+    description: "Proportional frequencies summing to 1."
+    tags: [pandas, groupby]
+  - id: tp-crosstab
+    structure: pd_crosstab
+    language: pandas
+    difficulty: 3
+    text: "ct = pd.crosstab(df['a'], df['b'])"
+    description: "2-way frequency table."
+    tags: [pandas, groupby]
+
+  # ── reshape / pivot / melt ───────────────────────────────────────
+  - id: tp-pivot
+    structure: pd_pivot
+    language: pandas
+    difficulty: 3
+    text: "wide = df.pivot(index='date', columns='k', values='x')"
+    description: "Long → wide on a unique (index, columns) pair."
+    tags: [pandas, reshape]
+  - id: tp-pivot-table
+    structure: pd_pivot_table
+    language: pandas
+    difficulty: 3
+    text: "wide = df.pivot_table(index='r', columns='k', values='x', aggfunc='sum')"
+    description: "Pivot with aggregation — handles duplicates."
+    tags: [pandas, reshape, groupby]
+  - id: tp-melt
+    structure: pd_melt
+    language: pandas
+    difficulty: 3
+    text: "long = df.melt(id_vars=['id'], var_name='metric', value_name='value')"
+    description: "Wide → long — inverse of pivot."
+    tags: [pandas, reshape]
+  - id: tp-stack
+    structure: pd_stack
+    language: pandas
+    difficulty: 3
+    text: "s = df.stack()"
+    description: "Push column index down into rows."
+    tags: [pandas, reshape]
+  - id: tp-unstack
+    structure: pd_unstack
+    language: pandas
+    difficulty: 3
+    text: "wide = s.unstack(level=-1)"
+    description: "Pop innermost row level up to columns."
+    tags: [pandas, reshape]
+  - id: tp-explode
+    structure: pd_explode
+    language: pandas
+    difficulty: 3
+    text: "df = df.explode('tags')"
+    description: "One row per list element in a column."
+    tags: [pandas, reshape]
+
+  # ── combine: concat / merge / join ───────────────────────────────
+  - id: tp-concat-rows
+    structure: pd_concat_rows
+    language: pandas
+    difficulty: 2
+    text: "df = pd.concat([a, b], ignore_index=True)"
+    description: "Stack two frames vertically with a fresh index."
+    tags: [pandas, combine]
+  - id: tp-concat-cols
+    structure: pd_concat_cols
+    language: pandas
+    difficulty: 3
+    text: "df = pd.concat([a, b], axis=1)"
+    description: "Stack horizontally — aligns on row index."
+    tags: [pandas, combine]
+  - id: tp-merge-inner
+    structure: pd_merge_inner
+    language: pandas
+    difficulty: 2
+    text: "m = a.merge(b, on='id')"
+    description: "Inner join on a shared key."
+    tags: [pandas, combine]
+  - id: tp-merge-left
+    structure: pd_merge_left
+    language: pandas
+    difficulty: 3
+    text: "m = a.merge(b, on='id', how='left')"
+    description: "Left join — keep all rows of a."
+    tags: [pandas, combine]
+  - id: tp-merge-multi-key
+    structure: pd_merge_multi
+    language: pandas
+    difficulty: 3
+    text: "m = a.merge(b, on=['region', 'date'], how='outer', indicator=True)"
+    description: "Outer join with merge indicator column."
+    tags: [pandas, combine]
+  - id: tp-merge-ondiff
+    structure: pd_merge_ondiff
+    language: pandas
+    difficulty: 3
+    text: "m = a.merge(b, left_on='aid', right_on='id', suffixes=('_a', '_b'))"
+    description: "Join with differently-named keys + suffix dedup."
+    tags: [pandas, combine]
+  - id: tp-merge-asof
+    structure: pd_merge_asof
+    language: pandas
+    difficulty: 3
+    text: "m = pd.merge_asof(trades, quotes, on='ts', by='ticker', direction='backward')"
+    description: "Nearest-key join — common in finance/event-stream joins."
+    tags: [pandas, combine, datetime]
+  - id: tp-join
+    structure: pd_join
+    language: pandas
+    difficulty: 3
+    text: "m = a.join(b, how='left', lsuffix='_a', rsuffix='_b')"
+    description: "Index-aligned join — convenient for MultiIndex."
+    tags: [pandas, combine]
+  - id: tp-update
+    structure: pd_update
+    language: pandas
+    difficulty: 3
+    text: "a.update(b)"
+    description: "Overwrite a's values from b where index/cols match."
+    tags: [pandas, combine]
+
+  # ── rolling / expanding / time-series ────────────────────────────
+  - id: tp-rolling-mean
+    structure: pd_rolling_mean
+    language: pandas
+    difficulty: 3
+    text: "df['ma7'] = df['x'].rolling(window=7).mean()"
+    description: "7-day moving average."
+    tags: [pandas, rolling]
+  - id: tp-rolling-std
+    structure: pd_rolling_std
+    language: pandas
+    difficulty: 3
+    text: "df['vol'] = df['ret'].rolling(window=30, min_periods=10).std()"
+    description: "Rolling stddev with min_periods threshold."
+    tags: [pandas, rolling]
+  - id: tp-rolling-time
+    structure: pd_rolling_time
+    language: pandas
+    difficulty: 3
+    text: "df['ma'] = df['x'].rolling('7D', on='ts').mean()"
+    description: "Time-based rolling window (requires sorted ts)."
+    tags: [pandas, rolling, datetime]
+  - id: tp-expanding
+    structure: pd_expanding
+    language: pandas
+    difficulty: 3
+    text: "df['cum_mean'] = df['x'].expanding(min_periods=1).mean()"
+    description: "Cumulative mean from start."
+    tags: [pandas, rolling]
+  - id: tp-ewm
+    structure: pd_ewm
+    language: pandas
+    difficulty: 3
+    text: "df['ema'] = df['x'].ewm(span=12, adjust=False).mean()"
+    description: "Exponentially-weighted moving average."
+    tags: [pandas, rolling]
+  - id: tp-resample-daily
+    structure: pd_resample_daily
+    language: pandas
+    difficulty: 3
+    text: "daily = df.resample('D', on='ts')['x'].sum()"
+    description: "Down-sample to daily totals."
+    tags: [pandas, rolling, datetime]
+  - id: tp-resample-ohlc
+    structure: pd_resample_ohlc
+    language: pandas
+    difficulty: 3
+    text: "bars = df['price'].resample('5min').ohlc()"
+    description: "5-minute OHLC bars from tick data."
+    tags: [pandas, rolling, datetime]
+  - id: tp-asfreq
+    structure: pd_asfreq
+    language: pandas
+    difficulty: 3
+    text: "ts = ts.asfreq('H', method='pad')"
+    description: "Reindex at a fixed frequency — pad gaps."
+    tags: [pandas, datetime]
+
+  # ── categorical ──────────────────────────────────────────────────
+  - id: tp-cut
+    structure: pd_cut
+    language: pandas
+    difficulty: 3
+    text: "df['bin'] = pd.cut(df['x'], bins=[0, 10, 100, 1000], labels=['s', 'm', 'l'])"
+    description: "Bin numeric values into labeled categories."
+    tags: [pandas, categorical]
+  - id: tp-qcut
+    structure: pd_qcut
+    language: pandas
+    difficulty: 3
+    text: "df['quantile'] = pd.qcut(df['x'], q=4, labels=False)"
+    description: "Quartile bins by rank — equal-frequency."
+    tags: [pandas, categorical]
+  - id: tp-cat-set
+    structure: pd_cat_set
+    language: pandas
+    difficulty: 3
+    text: "df['k'] = df['k'].cat.set_categories(['lo', 'med', 'hi'], ordered=True)"
+    description: "Define ordered category set."
+    tags: [pandas, categorical]
+  - id: tp-cat-codes
+    structure: pd_cat_codes
+    language: pandas
+    difficulty: 3
+    text: "df['code'] = df['k'].cat.codes"
+    description: "Integer codes for category values."
+    tags: [pandas, categorical]
+  - id: tp-cat-rename
+    structure: pd_cat_rename
+    language: pandas
+    difficulty: 3
+    text: "df['k'] = df['k'].cat.rename_categories({'A': 'alpha'})"
+    description: "Rename category labels."
+    tags: [pandas, categorical]
+
+  # ── styling / display config ─────────────────────────────────────
+  - id: tp-option-context
+    structure: pd_option_context
+    language: pandas
+    difficulty: 3
+    text: "with pd.option_context('display.max_rows', 100):"
+    description: "Temporarily widen display limits."
+    tags: [pandas, display]
+  - id: tp-set-option
+    structure: pd_set_option
+    language: pandas
+    difficulty: 3
+    text: "pd.set_option('display.float_format', '{:.4f}'.format)"
+    description: "Format floats globally."
+    tags: [pandas, display]
+
+  # ── window helpers ───────────────────────────────────────────────
+  - id: tp-clip-quantile
+    structure: pd_clip_quantile
+    language: pandas
+    difficulty: 3
+    text: "lo, hi = df['x'].quantile([0.01, 0.99])"
+    description: "Quantiles for outlier capping."
+    tags: [pandas, arithmetic]
+  - id: tp-quantile-axis
+    structure: pd_quantile_axis
+    language: pandas
+    difficulty: 3
+    text: "q = df.quantile(q=[0.25, 0.5, 0.75], axis=0)"
+    description: "Quartiles per column."
+    tags: [pandas, arithmetic]
+
+  # ── conversion to numpy / lists ──────────────────────────────────
+  - id: tp-to-numpy
+    structure: pd_to_numpy
+    language: pandas
+    difficulty: 2
+    text: "X = df[['a', 'b']].to_numpy()"
+    description: "Convert columns to a 2-D NumPy array."
+    tags: [pandas, dtype, numpy]
+  - id: tp-values
+    structure: pd_values
+    language: pandas
+    difficulty: 2
+    text: "arr = df['x'].values"
+    description: ".values attribute — legacy of to_numpy()."
+    tags: [pandas, dtype, numpy]
+  - id: tp-tolist
+    structure: pd_tolist
+    language: pandas
+    difficulty: 1
+    text: "items = df['x'].tolist()"
+    description: "Series → plain Python list."
+    tags: [pandas, dtype]
+  - id: tp-to-dict
+    structure: pd_to_dict
+    language: pandas
+    difficulty: 2
+    text: "records = df.to_dict(orient='records')"
+    description: "List of row dicts — common for APIs."
+    tags: [pandas, dtype]

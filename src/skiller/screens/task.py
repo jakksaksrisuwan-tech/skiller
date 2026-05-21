@@ -86,11 +86,15 @@ class TaskScreen(Screen):
     def _make_editor(text: str) -> TextArea:
         """Build a TextArea, degrading gracefully if syntax highlighting deps
         (`textual[syntax]` / tree-sitter) aren't installed."""
-        # 1) Best: code_editor with python highlighting.
-        try:
-            return TextArea.code_editor(text, language="python", id="editor")
-        except Exception:
-            pass
+        # 1) Best: code_editor with python highlighting + dark theme.
+        for theme in ("monokai", "dracula", "vscode_dark", None):
+            try:
+                kwargs = {"language": "python", "id": "editor"}
+                if theme:
+                    kwargs["theme"] = theme
+                return TextArea.code_editor(text, **kwargs)
+            except Exception:
+                continue
         # 2) code_editor without language (line numbers + indent behaviour).
         try:
             return TextArea.code_editor(text, id="editor")

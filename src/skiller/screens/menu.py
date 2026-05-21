@@ -11,6 +11,8 @@ MENU = [
     ("python_mcq", "Python MCQ"),
     ("typing_drill", "Typing Drill — Python structures"),
     ("typing_linux", "Typing Drill — Linux basics"),
+    ("typing_numpy", "Typing Drill — NumPy matrix manipulation"),
+    ("typing_pandas", "Typing Drill — pandas DataFrame ops"),
     ("python_task_practice", "Python Task — Practice"),
     ("python_task_easy", "Python Task — Easy (~30 min)"),
     ("python_task_csv", "Python Task — CSV Aggregate (20/40 min targets)"),

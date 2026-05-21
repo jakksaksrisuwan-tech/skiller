@@ -4,10 +4,12 @@ version = "0.1.0"
 description = "TUI for DevSkiller-style technical exercise prep"
 requires-python = ">=3.11"
 dependencies = [
-    "textual>=0.85",
+    "textual[syntax]>=0.85",
     "rich>=13.7",
     "pyyaml>=6.0",
     "watchfiles>=0.21",
+    "numpy>=1.26",
+    "pandas>=2.0",
 ]
 
 [project.optional-dependencies]
